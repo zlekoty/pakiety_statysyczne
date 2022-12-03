@@ -1,0 +1,54 @@
+---
+title: "happines"
+output: pdf_document
+date: "2022-12-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Spis treści
+
+# Wstęp
+
+## Przedstawienie danych
+W naszym raporcie będziemy korzystać z danych z platformy kaggle.com, które zestawiają poziom szczęścia w krajach na całym świecie, z innymi czynnikami, takimi jak:
+\begin{itemize}
+\item PKB na osobę,
+\item Pomoc społeczna,
+\item Zdrowie,
+\item Wolność,
+\item Hojność,
+\item Postrzeganie korupcji,
+\item Dystopia,
+\item Rzeczywista korupcja.
+\end{itemize}
+Zbiór danych zawiera następujące zmienne:
+
+**Poziom szczęścia** - cds
+
+**Kraj** - cds
+
+**Kontynent** - cds
+
+## Cel analizy
+Chcemy zbadać korelację między wyróżnionymi czynnikami a poziomem sczęścia. W szczególności będzie nas interesowała odpowiedź na następujące pytania:
+
+W jakich krajach/ na jakich kontynentach poziom szczęścia jest najwyższy?
+
+Między jakimi czynnikami występuje największa korelacja z poziomem szczęścia?
+
+Jaki jest trend globalnego poziomu szczęścia na przestrzeni lat?
+
+Zobrazujemy średni poziom szczęścia z wybranych lat, dla wszystkich krajów, z zaznaczonymi kontynentami (rozważymy każdy kraj z osobna i średnią z kontynentów) a także zobaczymy jak układał się on globalnie na przestrzeni lat. Następnie zajmiemy się zbadaniem korelacji między poszczególnymi czynnikami.
+
+[zajmiemy się sprawdzeniem naszej hipotezy: 
+Największa korelacja występuje między poziomem szczęścia a rzeczywistą korupcją. (W państwach gdzie wskaźnik szczęścia jest wysoki, korupcja jest niska.)]
+
+# Analiza i wizualizacja danych
+
+
+
+
+# Wnioski
