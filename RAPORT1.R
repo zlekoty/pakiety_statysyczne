@@ -3,7 +3,7 @@ require(tigerstats)
 library(corrplot)
 
 
-df <- read.csv("C:\\Users\\Adamek\\Desktop\\WorldHappiness_Corruption_2015_2020.csv")
+df <- read.csv("C:\\Users\\zleko\\Desktop\\WorldHappiness_Corruption_2015_2020.csv")
 df[df==0] <- NA
 #View(df)
 colnames(df) <- c("Pañstwo", "Szczêœcie", "PKB na jednego mieszkañca", "Rodzina", "Zdrowie", "Wolnoœæ", "Szczodroœæ", "Zaufanie do rz¹du", "Dystopia","Kontynent","Rok", "Wsparcie socjalne", "Korupcja")
@@ -18,27 +18,15 @@ for (i in 2015:2020){
   index <- index + 1
 }
 
-countries <- unique(df$Pañstwo)
+#Uœredniony df
+df2 <- aggregate(df, list(df$Pañstwo), mean, na.rm = TRUE)
+df2 <- select(df2, -Pañstwo, -Kontynent,-Rok)
+names(df2)[names(df2) == 'Group.1'] <- 'Pañstwo'
+df2 <- merge(df2, select(df, "Pañstwo", "Kontynent"))
+df2 <- df2[!duplicated(df2),]
 
-df2 <- aggregate(df, list(df$Pañstwo), mean)
-mean(df$`Wsparcie socjalne`)
-
-#A <- apply(df$Szczêœcie,1,function(x)= mean(na.omit(x)))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+View(df2)
+#
 
 
 
