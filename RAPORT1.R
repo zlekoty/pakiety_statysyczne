@@ -3,9 +3,105 @@ require(tigerstats)
 library(corrplot)
 
 
-df <- read.csv("C:\\Users\\zleko\\Desktop\\WorldHappiness_Corruption_2015_2020.csv")
+df <- read.csv("C:\\Users\\Adamek\\Desktop\\WorldHappiness_Corruption_2015_2020.csv")
 df[df==0] <- NA
+#View(df)
+colnames(df) <- c("Pañstwo", "Szczêœcie", "PKB na jednego mieszkañca", "Rodzina", "Zdrowie", "Wolnoœæ", "Szczodroœæ", "Zaufanie do rz¹du", "Dystopia","Kontynent","Rok", "Wsparcie socjalne", "Korupcja")
 View(df)
+
+Means <- numeric(6)
+
+index <- 1
+
+for (i in 2015:2020){
+  Means[index] <- mean(df[df$Rok == i, ]$Szczêœcie)
+  index <- index + 1
+}
+
+countries <- unique(df$Pañstwo)
+
+df2 <- aggregate(df, list(df$Pañstwo), mean)
+mean(df$`Wsparcie socjalne`)
+
+#A <- apply(df$Szczêœcie,1,function(x)= mean(na.omit(x)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 dane_2015 <- df[df$Year == 2015, ]
 countries <- unique(df$Country)
@@ -45,3 +141,5 @@ plot(df$dystopia_residual,df$happiness_score)
 res <- cor(df1[,c(2,3,4,5,6)])
 corrplot(res, type = "upper", order = "hclust", 
          tl.col = "black", tl.srt = 45)
+
+
