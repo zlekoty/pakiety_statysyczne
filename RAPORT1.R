@@ -1,7 +1,7 @@
 library(dplyr)
 require(tigerstats)
 library(corrplot)
-
+library(ggplot2)
 
 df <- read.csv("C:\\Users\\zleko\\Desktop\\WorldHappiness_Corruption_2015_2020.csv")
 df[df==0] <- NA
@@ -10,13 +10,19 @@ colnames(df) <- c("Pañstwo", "Szczêœcie", "PKB na jednego mieszkañca", "Rodzina"
 View(df)
 
 Means <- numeric(6)
+Means_Africa <- numeric(6)
 
 index <- 1
 
 for (i in 2015:2020){
   Means[index] <- mean(df[df$Rok == i, ]$Szczêœcie)
+  df3 <- subset(df, Kontynent=="Africa" & Rok==i)
+  Means_Africa[index] <- mean(df3$Szczêœcie)
   index <- index + 1
 }
+Means_Africa
+plot(c(2015:2020),Means,ylim = c(3,6))
+lines(c(2015:2020),Means_Africa,col="red")
 
 #Uœredniony df
 df2 <- aggregate(df, list(df$Pañstwo), mean, na.rm = TRUE)
@@ -24,6 +30,9 @@ df2 <- select(df2, -Pañstwo, -Kontynent,-Rok)
 names(df2)[names(df2) == 'Group.1'] <- 'Pañstwo'
 df2 <- merge(df2, select(df, "Pañstwo", "Kontynent"))
 df2 <- df2[!duplicated(df2),]
+
+ggplot(df2, aes(x = Szczêœcie, y = reorder(Pañstwo,Szczêœcie)))+
+  geom_point(aes(color =Kontynent))
 
 View(df2)
 #
@@ -117,6 +126,8 @@ View(df1)
 
 ggplot(df1, aes(x = mean_happines, y = reorder(Country,mean_happines)))+
   geom_point(aes(color =continent))
+
+
 
 # zobaczyc srednio z ca³ego œwiata jak siê zmienia³o
 
