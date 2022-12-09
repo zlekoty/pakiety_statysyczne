@@ -2,27 +2,24 @@ library(dplyr)
 require(tigerstats)
 library(corrplot)
 library(ggplot2)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(cowplot)
 
 df <- read.csv("C:\\Users\\zleko\\Desktop\\WorldHappiness_Corruption_2015_2020.csv")
 df[df==0] <- NA
-#View(df)
 colnames(df) <- c("Pañstwo", "Szczêœcie", "PKB na jednego mieszkañca", "Rodzina", "Zdrowie", "Wolnoœæ", "Szczodroœæ", "Zaufanie do rz¹du", "Dystopia","Kontynent","Rok", "Wsparcie socjalne", "Korupcja")
-View(df)
+#View(df)
 
-Means <- numeric(6)
-Means_Africa <- numeric(6)
 
-index <- 1
+###########################
+q <- aggregate(Szczêœcie ~ Rok + Kontynent, data = df, FUN = mean)
+ggplot(q, aes(x=Rok, y=Szczêœcie, shape=Kontynent)) +
+  geom_point() + 
+  stat_summary(fun = mean, size = 2, geom = "point")
+###############################
 
-for (i in 2015:2020){
-  Means[index] <- mean(df[df$Rok == i, ]$Szczêœcie)
-  df3 <- subset(df, Kontynent=="Africa" & Rok==i)
-  Means_Africa[index] <- mean(df3$Szczêœcie)
-  index <- index + 1
-}
-Means_Africa
-plot(c(2015:2020),Means,ylim = c(3,6))
-lines(c(2015:2020),Means_Africa,col="red")
+
 
 #Uœredniony df
 df2 <- aggregate(df, list(df$Pañstwo), mean, na.rm = TRUE)
@@ -34,11 +31,40 @@ df2 <- df2[!duplicated(df2),]
 ggplot(df2, aes(x = Szczêœcie, y = reorder(Pañstwo,Szczêœcie)))+
   geom_point(aes(color =Kontynent))
 
-View(df2)
+#View(df2)
+#corr wszystkich
+res <- cor(df2[,c(2:11)], use = "complete.obs" )
+corrplot(res, type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 45)
+
+#corr wszystkie z szcesciem
+corr <- cor(df2[,c(3:11)], df2$Szczêœcie, use = "complete.obs")
+corr_df <- data.frame(labels(corr),corr)
+colnames(corr_df) <- c("status","nvm","corr")
+ggplot(corr_df, aes(x=reorder(status,corr),y=corr)) +
+  geom_bar(stat="identity", width=0.5)
+
+#œwiat bajer
+world <- ne_countries(scale = "medium", returnclass = "sf")
+world1 <- left_join(world, df2, by = c("name"="Pañstwo"))
+ggplot(data = world1) +
+  geom_sf(aes(fill = Szczêœcie)) +
+  scale_fill_viridis_c(option = "plasma")
+
+#macierz korelacji z szczesciem w plotrach
+p <- list()
+index <- 1
+for(k in colnames(df2)){
+  if(k != "Pañstwo" & k!= "Kontynent" & k != "Szczêœcie"){
+    p[[index]] <-  ggplot(df2, aes(x = .data[[k]], y = Szczêœcie))+ 
+      geom_point()+
+      geom_smooth(method=lm)
+    index <- index + 1
+  }
+}
+plot_grid(plotlist = p)
 #
-
-
-
+#
 
 
 
