@@ -51,18 +51,22 @@ ggplot(data = world1) +
   geom_sf(aes(fill = Szczêœcie)) +
   scale_fill_viridis_c(option = "plasma")
 
-#macierz korelacji z szczesciem w plotrach
+#macierz korelacji z szczesciem w plotrach +hist
 p <- list()
+h <- list()
 index <- 1
 for(k in colnames(df2)){
   if(k != "Pañstwo" & k!= "Kontynent" & k != "Szczêœcie"){
     p[[index]] <-  ggplot(df2, aes(x = .data[[k]], y = Szczêœcie))+ 
       geom_point()+
       geom_smooth(method=lm)
+    h[[index]] <- ggplot(df2, aes(x = .data[[k]]))+
+      geom_histogram()
     index <- index + 1
   }
 }
 plot_grid(plotlist = p)
+plot_grid(plotlist = h)
 #
 #
 
