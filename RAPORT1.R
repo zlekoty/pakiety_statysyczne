@@ -19,11 +19,10 @@ View(df)
 
 ###########################
 q <- aggregate(Szczêœcie ~ Rok + Kontynent, data = df, FUN = mean)
-ggplot(q, aes(x=Rok, y=Szczêœcie, shape=Kontynent)) +
-  geom_point() + 
-  stat_summary(fun = mean, size = 2, geom = "point")
+ggplot(q, aes(x=Rok, y=Szczêœcie, shape= Kontynent)) +
+  geom_point() +
+  stat_summary(fun = "mean", colour = "red", size = 5, geom = "point",shape = "o")
 ###############################
-
 
 
 #Uœredniony df
@@ -99,7 +98,8 @@ for(k in colnames(df2)){
 plot_grid(plotlist = p)
 plot_grid(plotlist = h)
 #
-plot(df2$`Zaufanie do rz¹du`,df2$Korupcja)
+ggplot(df2, aes(x = `Zaufanie do rz¹du`, y = Korupcja))+ 
+  geom_point()
 cor(df2$`Zaufanie do rz¹du`,df2$Korupcja)
 #
 
