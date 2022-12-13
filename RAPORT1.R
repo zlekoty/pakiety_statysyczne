@@ -6,10 +6,15 @@ library(rnaturalearth)
 library(rnaturalearthdata)
 library(cowplot)
 
+
+
 df <- read.csv("C:\\Users\\zleko\\Desktop\\WorldHappiness_Corruption_2015_2020.csv")
+df$family <- df$family + df$social_support  
+df <- subset(df, select = -c(social_support,dystopia_residual))
 df[df==0] <- NA
-colnames(df) <- c("Pañstwo", "Szczêœcie", "PKB na jednego mieszkañca", "Rodzina", "Zdrowie", "Wolnoœæ", "Szczodroœæ", "Zaufanie do rz¹du", "Dystopia","Kontynent","Rok", "Wsparcie socjalne", "Korupcja")
-#View(df)
+View(df)
+colnames(df) <- c("Pañstwo", "Szczêœcie", "PKB na jednego mieszkañca", "Rodzina", "Zdrowie", "Wolnoœæ", "Szczodroœæ", "Zaufanie do rz¹du","Kontynent","Rok", "Korupcja")
+View(df)
 
 
 ###########################
@@ -27,22 +32,48 @@ df2 <- select(df2, -Pañstwo, -Kontynent,-Rok)
 names(df2)[names(df2) == 'Group.1'] <- 'Pañstwo'
 df2 <- merge(df2, select(df, "Pañstwo", "Kontynent"))
 df2 <- df2[!duplicated(df2),]
+View(df2)
 
-ggplot(df2, aes(x = Szczêœcie, y = reorder(Pañstwo,Szczêœcie)))+
-  geom_point(aes(color =Kontynent))
+ggplot(df2, aes(y = Szczêœcie, x = reorder(Pañstwo,Szczêœcie),fill=Kontynent))+
+  geom_bar(stat="identity", width=0.5)+
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5,size = 3))
 
 #View(df2)
 #corr wszystkich
-res <- cor(df2[,c(2:11)], use = "complete.obs" )
+res <- cor(df2[,c(2:9)], use = "complete.obs" )
 corrplot(res, type = "upper", order = "hclust", 
          tl.col = "black", tl.srt = 45)
 
-#corr wszystkie z szcesciem
-corr <- cor(df2[,c(3:11)], df2$Szczêœcie, use = "complete.obs")
-corr_df <- data.frame(labels(corr),corr)
-colnames(corr_df) <- c("status","nvm","corr")
-ggplot(corr_df, aes(x=reorder(status,corr),y=corr)) +
+#corr wszystkie z szcesciem pearson
+corr_pearson <- cor(df2[,c(3:9)], df2$Szczêœcie, use = "complete.obs")
+corr_df_pearson <- data.frame(labels(corr_pearson),corr_pearson)
+colnames(corr_df_pearson) <- c("status","corr_method","corr")
+corr_df_pearson$corr_method <- "pearson"
+ggplot(corr_df_pearson, aes(x=reorder(status,corr_pearson),y=corr_pearson)) +
   geom_bar(stat="identity", width=0.5)
+
+#corr kendall
+corr_kendall <- cor(df2[,c(3:9)], df2$Szczêœcie, use = "complete.obs",method = "kendall")
+corr_df_kendall <- data.frame(labels(corr_kendall),corr_kendall)
+colnames(corr_df_kendall) <- c("status","corr_method","corr")
+corr_df_kendall$corr_method <- "kendall"
+ggplot(corr_df_kendall, aes(x=reorder(status,corr_kendall),y=corr_kendall)) +
+  geom_bar(stat="identity", width=0.5)
+
+#corr spearman
+corr_spearman <- cor(df2[,c(3:9)], df2$Szczêœcie, use = "complete.obs",method = "spearman")
+corr_df_spearman <- data.frame(labels(corr_spearman),corr_spearman)
+colnames(corr_df_spearman) <- c("status","corr_method","corr")
+corr_df_spearman$corr_method <- "spearman"
+ggplot(corr_df_spearman, aes(x=reorder(status,corr_spearman),y=corr_spearman)) +
+  geom_bar(stat="identity", width=0.5)
+
+# 3 CORR W 1
+corr_df_all <- rbind(corr_df_pearson,corr_df_kendall,corr_df_spearman)
+ggplot(corr_df_all, aes(x=reorder(status,corr),y=corr,fill=corr_method)) +
+  geom_bar(position="dodge",stat="identity", width=0.5)+
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+
 
 #œwiat bajer
 world <- ne_countries(scale = "medium", returnclass = "sf")
@@ -61,13 +92,15 @@ for(k in colnames(df2)){
       geom_point()+
       geom_smooth(method=lm)
     h[[index]] <- ggplot(df2, aes(x = .data[[k]]))+
-      geom_histogram()
+      geom_histogram(bins = 10)
     index <- index + 1
   }
 }
 plot_grid(plotlist = p)
 plot_grid(plotlist = h)
 #
+plot(df2$`Zaufanie do rz¹du`,df2$Korupcja)
+cor(df2$`Zaufanie do rz¹du`,df2$Korupcja)
 #
 
 
