@@ -1,0 +1,55 @@
+---
+title: "Wpływ wybranych zależności na szczęśliwość społeczeństwa"
+output: pdf_document
+date: "2022-12-18"
+---
+\renewcommand{\contentsname}{Spis treści}
+\renewcommand{\figurename}{Wykres}
+\renewcommand{\tablename}{Tablica}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+\tableofcontents
+
+# Wstęp
+
+## Przedstawienie danych
+W naszym raporcie będziemy korzystać z danych z platformy kaggle.com, które zestawiają dane o poziomie szczęścia na świecie zebrane przez instytut Gallupa, wraz z postrzeganym poziomem korupcji (CPI) pozyskanymi ze strony pozarządowej organizacji Transparency International. Dane dotyczą lat 2015-2020.
+
+Zbiór danych składa się z następujących zmiennych:
+
+\begin{itemize}
+\item \textbf{Poziom szczęścia} - średnia odpowiedzi na pytanie dotyczące oceny życia z ankiety Gallup World Poll (GWP).
+\item \textbf{Państwo} - nazwa państwa do którego odnoszą się pozostałe dane.
+\item \textbf{Kontynent} - kontynent na którym znajduje się dane państwo.
+\item \textbf{Rok} - rok z którego pochodzą zebrane dane.
+\item \textbf{PKB na jednego mieszkańca} - szacowany zakres, w jakim PKB na mieszkańca przyczynia się do obliczenia poziomu szczęścia. Jest to stosunek wartości PKB w cenach bieżących do liczby ludności danego obszaru.
+\item \textbf{Rodzina} - szacowany stopień, w jakim rodzina przyczynia się do obliczenia poziomu szczęścia. Jest to średnia odpowiedzi w danym kraju, na pytanie GWP "Czy będąc w potrzebie, możesz zawsze liczyć na krewnych bądź przyjaciół?".
+\item \textbf{Zdrowie} - szacowany stopień, w jakim zdrowie (oczekiwana długość życia) przyczynia się do obliczenia poziomu szczęścia. Estymowana długość życia, obliczana na podstawie danych Światowej Organizacji Zdrowia.
+\item \textbf{Wolność} - szacowany stopień, w jakim wolność przyczynia się do obliczenia poziomu szczęścia. Uśredniona odpowiedź na pytanie GWP "Czy jesteś usatysfakcjonowany z poziomu wolności wyboru, do tego co chcesz robić w swoim życiu?"
+\item \textbf{Szczodrość} - szacowany stopień, w jakim szczodrość przyczynia się do obliczenia poziomu szczęścia. Równa residuum z regresji średniej krajowej odpowiedzi na pytanie GWP "Czy w ostatnim miesiącu przekazałeś pieniądze na cele charytatywne?" Przeliczonym w stosunku do PKB na osobę.
+\item \textbf{Zaufanie do rządu} - szacowany stopień, w jakim zaufanie do rządu przyczynia się do obliczenia poziomu szczęścia. Średnia odpowiedź na pytania "Czy korupcja jest rozpowszechniona w rządzie?" oraz "Czy korupcja jest rozpowszechniona w przedsiębiorstwach?". W przypadku braku danych dotyczących korupcji w rządzie, jako ogólną miarę postrzegania korupcji stosuje się percepcję korupcji w biznesie.
+\end{itemize}
+
+
+
+
+## Cel analizy
+Chcemy zbadać korelację między wyróżnionymi czynnikami a poziomem sczęścia. W szczególności będzie nas interesowała odpowiedź na następujące pytania:
+
+W jakich krajach/ na jakich kontynentach poziom szczęścia jest najwyższy?
+
+Między jakimi czynnikami występuje największa korelacja z poziomem szczęścia?
+
+Jaki jest trend globalnego poziomu szczęścia na przestrzeni lat?
+
+Zobrazujemy średni poziom szczęścia z wybranych lat, dla wszystkich krajów, z zaznaczonymi kontynentami (rozważymy każdy kraj z osobna i średnią z kontynentów) a także zobaczymy jak układał się on globalnie na przestrzeni lat. Następnie zajmiemy się zbadaniem korelacji między poszczególnymi czynnikami.
+
+[zajmiemy się sprawdzeniem naszej hipotezy: 
+Największa korelacja występuje między poziomem szczęścia a rzeczywistą korupcją. (W państwach gdzie wskaźnik szczęścia jest wysoki, korupcja jest niska.)]
+
+# Analiza i wizualizacja danych
+
+# Wnioski
