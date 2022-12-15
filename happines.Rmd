@@ -1,20 +1,25 @@
 ---
-title: "happines"
+title: "Wpływ wybranych zależności na szczęśliwość społeczeństwa"
 output: pdf_document
-date: "2022-12-03"
+date: "2022-12-18"
 ---
 \renewcommand{\contentsname}{Spis treści}
+\renewcommand{\figurename}{Wykres}
+\renewcommand{\tablename}{Tablica}
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 \tableofcontents
 
 # Wstęp
 
+Niniejsze sprawozdanie zostało sporządzone w ramach laboratorium Pakietów Statystycznych, prowadzonych przez dr inż. Daniela Kucharczyka(odnośnik do strony), do wykładu dr Andrzeja Giniewicza(odnośnik do strony). Naszym zadaniem jest analiza wybranych danych rzeczywistych, która posłuży do rozwiązania ustalonego problemu badawczego.
+Do wykonania naszego celu wykorzystamy pakiet R wraz z jego dostępnymi bibliotekami, których krótki opis zawarliśmy w Tabeli (Zrobić tabelę).
+
 ## Przedstawienie danych
-W naszym raporcie będziemy korzystać z danych z platformy kaggle.com, które zestawiają dane o poziomie szczęścia na świecie zebrane przez instytut Gallupa, wraz z postrzeganym poziomem korupcji (CPI) pozyskanymi ze strony pozarządowej organizacji Transparency International. Dane dotyczą lat 2015-2020.
+Skorzystamy z danych, zestawiająch estymowany wpływ poszczególnych zmiennych na Poziom Szczęścia społeczeństwa, zebranych przez instytut Gallupa(odnośnik do badania), wraz z postrzeganym poziomem korupcji (CPI) pozyskanymi przez pozarządową organizację Transparency International(odnośnik do badania). Dane dotyczą lat 2015-2020.
 
 Zbiór danych składa się z następujących zmiennych:
 
@@ -49,8 +54,5 @@ Zobrazujemy średni poziom szczęścia z wybranych lat, dla wszystkich krajów, 
 Największa korelacja występuje między poziomem szczęścia a rzeczywistą korupcją. (W państwach gdzie wskaźnik szczęścia jest wysoki, korupcja jest niska.)]
 
 # Analiza i wizualizacja danych
-
-
-
 
 # Wnioski
