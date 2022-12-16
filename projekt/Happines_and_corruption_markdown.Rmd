@@ -1,0 +1,193 @@
+---
+title: "Wpływ wybranych zależności na szczęśliwość społeczeństwa"
+output: pdf_document
+date: "2022-12-18"
+---
+\renewcommand{\contentsname}{Spis treści}
+\renewcommand{\figurename}{Wykres}
+\renewcommand{\tablename}{Tabela}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+```{r echo=FALSE, warning=FALSE, include=FALSE}
+
+library(corrplot)
+library(cowplot)
+library(dplyr)
+library(ggplot2)
+library(rnaturalearth)
+library(rnaturalearthdata)
+require(tigerstats)
+
+
+df <- read.csv("Data\\WorldHappiness_Corruption_2015_2020.csv")
+df$family <- df$family + df$social_support  
+df <- subset(df, select = -c(social_support,dystopia_residual))
+df[df==0] <- NA
+#View(df)
+colnames(df) <- c("Państwo", "Szczęście", "PKB na jednego mieszkańca", "Rodzina", "Zdrowie", "Wolność", "Szczodrość", "Zaufanie do rządu","Kontynent","Rok", "Korupcja")
+#View(df)
+
+
+###########################
+q <- aggregate(Szczęście ~ Rok + Kontynent, data = df, FUN = mean)
+ggplot(q, aes(x=Rok, y=Szczęście, shape= Kontynent)) +
+  geom_point() +
+  stat_summary(fun = "mean", colour = "red", size = 5, geom = "point",shape = "o")
+###############################
+
+
+#Uśredniony df
+df2 <- aggregate(df, list(df$Państwo), mean, na.rm = TRUE)
+df2 <- select(df2, -Państwo, -Kontynent,-Rok)
+names(df2)[names(df2) == 'Group.1'] <- 'Państwo'
+df2 <- merge(df2, select(df, "Państwo", "Kontynent"))
+df2 <- df2[!duplicated(df2),]
+
+s <- ggplot(df2, aes(y = Szczęście, x = reorder(Państwo,Szczęście),fill=Kontynent))+
+  geom_bar(stat="identity", width=0.5)+
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5,size = 3))
+
+#View(df2)
+#corr wszystkich
+res <- cor(df2[,c(2:9)], use = "complete.obs" )
+corrplot(res, type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 45)
+
+#corr wszystkie z szcesciem pearson
+corr_pearson <- cor(df2[,c(3:9)], df2$Szczęście, use = "complete.obs")
+corr_df_pearson <- data.frame(labels(corr_pearson),corr_pearson)
+colnames(corr_df_pearson) <- c("status","corr_method","corr")
+corr_df_pearson$corr_method <- "pearson"
+ggplot(corr_df_pearson, aes(x=reorder(status,corr_pearson),y=corr_pearson)) +
+  geom_bar(stat="identity", width=0.5)
+
+#corr kendall
+corr_kendall <- cor(df2[,c(3:9)], df2$Szczęście, use = "complete.obs",method = "kendall")
+corr_df_kendall <- data.frame(labels(corr_kendall),corr_kendall)
+colnames(corr_df_kendall) <- c("status","corr_method","corr")
+corr_df_kendall$corr_method <- "kendall"
+ggplot(corr_df_kendall, aes(x=reorder(status,corr_kendall),y=corr_kendall)) +
+  geom_bar(stat="identity", width=0.5)
+
+#corr spearman
+corr_spearman <- cor(df2[,c(3:9)], df2$Szczęście, use = "complete.obs",method = "spearman")
+corr_df_spearman <- data.frame(labels(corr_spearman),corr_spearman)
+colnames(corr_df_spearman) <- c("status","corr_method","corr")
+corr_df_spearman$corr_method <- "spearman"
+ggplot(corr_df_spearman, aes(x=reorder(status,corr_spearman),y=corr_spearman)) +
+  geom_bar(stat="identity", width=0.5)
+
+# 3 CORR W 1
+corr_df_all <- rbind(corr_df_pearson,corr_df_kendall,corr_df_spearman)
+ggplot(corr_df_all, aes(x=reorder(status,corr),y=corr,fill=corr_method)) +
+  geom_bar(position="dodge",stat="identity", width=0.5)+
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+
+
+#świat bajer
+world <- ne_countries(scale = "medium", returnclass = "sf")
+world1 <- left_join(world, df2, by = c("name"="Państwo"))
+ggplot(data = world1) +
+  geom_sf(aes(fill = Szczęście)) +
+  scale_fill_viridis_c(option = "plasma")
+
+#macierz korelacji z szczesciem w plotrach +hist
+p <- list()
+h <- list()
+index <- 1
+for(k in colnames(df2)){
+  if(k != "Państwo" & k!= "Kontynent" & k != "Szczęście"){
+    p[[index]] <-  ggplot(df2, aes(x = .data[[k]], y = Szczęście))+ 
+      geom_point()+
+      geom_smooth(method=lm)
+    h[[index]] <- ggplot(df2, aes(x = .data[[k]]))+
+      geom_histogram(bins = 10)
+    index <- index + 1
+  }
+}
+plot_grid(plotlist = p)
+plot_grid(plotlist = h)
+#
+ggplot(df2, aes(x = `Zaufanie do rządu`, y = Korupcja))+ 
+  geom_point()
+cor(df2$`Zaufanie do rządu`,df2$Korupcja)
+```
+
+\tableofcontents
+
+# Wstęp
+
+Niniejsze sprawozdanie zostało sporządzone w ramach laboratorium Pakietów Statystycznych, prowadzonych przez \href{https://dkucharc.github.io/academic/}{dr inż. Daniela Kucharczyka}, do wykładu \href{http://prac.im.pwr.edu.pl/~giniew/doku.php}{dr Andrzeja Giniewicza}. Naszym zadaniem jest analiza wybranych danych rzeczywistych, która posłuży do rozwiązania ustalonego problemu badawczego.
+Do wykonania naszego celu wykorzystamy pakiet R wraz z jego dostępnymi bibliotekami, których krótki opis zawarliśmy w Tabeli \ref{tab:pakiety}).
+\begin{center}
+
+```{r}
+names <- c("corrplot",
+           "cowplot",
+           "dplyr",
+           "ggplot2",
+           "rnaturalearth",
+           "rnaturalearthdata",
+           "tigerstats")
+descriptions <- c("lines", 
+                  "lines",  
+                  "lines",  
+                  "lines",  
+                  "lines",  
+                  "lines",  
+                  "lines")
+
+Packages <- data.frame(names, descriptions)
+knitr::kable(Packages,"latex", align = c("c", "c"), caption = "Biblioteki używane w raporcie", label = "pakiety")
+```
+\end{center}
+
+## Przedstawienie danych
+Skorzystamy z danych, zestawiająch estymowany wpływ poszczególnych zmiennych na Poziom Szczęścia społeczeństwa, zebranych przez instytut Gallupa(odnośnik do badania), wraz z postrzeganym poziomem korupcji (CPI) pozyskanymi przez pozarządową organizację Transparency International(odnośnik do badania). Dane dotyczą lat 2015-2020.
+
+Zbiór danych składa się z następujących zmiennych:
+
+\begin{itemize}
+\item \textbf{Poziom szczęścia} - średnia odpowiedzi na pytanie dotyczące oceny życia z ankiety Gallup World Poll (GWP).
+\item \textbf{Państwo} - nazwa państwa do którego odnoszą się pozostałe dane.
+\item \textbf{Kontynent} - kontynent na którym znajduje się dane państwo.
+\item \textbf{Rok} - rok z którego pochodzą zebrane dane.
+\item \textbf{PKB na jednego mieszkańca} - szacowany zakres, w jakim PKB na mieszkańca przyczynia się do obliczenia poziomu szczęścia. Jest to stosunek wartości PKB w cenach bieżących do liczby ludności danego obszaru.
+\item \textbf{Rodzina} - szacowany stopień, w jakim rodzina przyczynia się do obliczenia poziomu szczęścia. Jest to średnia odpowiedzi w danym kraju, na pytanie GWP "Czy będąc w potrzebie, możesz zawsze liczyć na krewnych bądź przyjaciół?".
+\item \textbf{Zdrowie} - szacowany stopień, w jakim zdrowie (oczekiwana długość życia) przyczynia się do obliczenia poziomu szczęścia. Estymowana długość życia, obliczana na podstawie danych Światowej Organizacji Zdrowia.
+\item \textbf{Wolność} - szacowany stopień, w jakim wolność przyczynia się do obliczenia poziomu szczęścia. Uśredniona odpowiedź na pytanie GWP "Czy jesteś usatysfakcjonowany z poziomu wolności wyboru, do tego co chcesz robić w swoim życiu?"
+\item \textbf{Szczodrość} - szacowany stopień, w jakim szczodrość przyczynia się do obliczenia poziomu szczęścia. Równa residuum z regresji średniej krajowej odpowiedzi na pytanie GWP "Czy w ostatnim miesiącu przekazałeś pieniądze na cele charytatywne?" Przeliczonym w stosunku do PKB na osobę.
+\item \textbf{Zaufanie do rządu} - szacowany stopień, w jakim zaufanie do rządu przyczynia się do obliczenia poziomu szczęścia. Średnia odpowiedź na pytania "Czy korupcja jest rozpowszechniona w rządzie?" oraz "Czy korupcja jest rozpowszechniona w przedsiębiorstwach?". W przypadku braku danych dotyczących korupcji w rządzie, jako ogólną miarę postrzegania korupcji stosuje się percepcję korupcji w biznesie.
+\end{itemize}
+
+
+
+
+## Cel analizy
+Chcemy zbadać korelację między wyróżnionymi czynnikami a poziomem sczęścia. W szczególności będzie nas interesowała odpowiedź na następujące pytania:
+
+W jakich krajach/ na jakich kontynentach poziom szczęścia jest najwyższy?
+
+Między jakimi czynnikami występuje największa korelacja z poziomem szczęścia?
+
+Jaki jest trend globalnego poziomu szczęścia na przestrzeni lat?
+
+Zobrazujemy średni poziom szczęścia z wybranych lat, dla wszystkich krajów, z zaznaczonymi kontynentami (rozważymy każdy kraj z osobna i średnią z kontynentów) a także zobaczymy jak układał się on globalnie na przestrzeni lat. Następnie zajmiemy się zbadaniem korelacji między poszczególnymi czynnikami.
+
+[zajmiemy się sprawdzeniem naszej hipotezy: 
+Największa korelacja występuje między poziomem szczęścia a rzeczywistą korupcją. (W państwach gdzie wskaźnik szczęścia jest wysoki, korupcja jest niska.)]
+
+# Analiza i wizualizacja danych
+
+
+```{r, fig.cap="\\label{fig:f1}Poziom szczęścia na świecie"}
+s
+```
+
+sakdjsad [\ref{fig:f1}] sdsadixjiw
+
+
+# Wnioski
+
