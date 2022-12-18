@@ -1,5 +1,5 @@
 ---
-title: "Wpływ wybranych statystyk na poziom szczęścia społeczeństwa"
+title: "Szczęście i korupcja na świecie w latach 2015-2020"
 author: Joanna Kołaczek, Adam Wrzesiński
 output: pdf_document
 date: "2022-12-18"
@@ -104,8 +104,8 @@ x <- ggplot(df2, aes(x = Korupcja, y = `Zaufanie do rządu`))+
 
 # Wstęp
 
-Niniejsze sprawozdanie zostało sporządzone w ramach laboratorium Pakietów Statystycznych, prowadzonych przez dr inż. Daniela Kucharczyka[^1], do wykładu dr Andrzeja Giniewicza[^2]. Naszym zadaniem jest analiza wybranych danych rzeczywistych, która posłuży do rozwiązania ustalonych problemów badawczych.
-Do wykonania naszego raportu wykorzystamy pakiet R wraz z jego wybranymi bibliotekami, których krótki opis zawarliśmy w Tabeli \ref{tab:pakiety}.
+Niniejsze sprawozdanie zostało sporządzone w ramach laboratorium Pakietów Statystycznych, prowadzonych przez dr inż. Daniela Kucharczyka[^1], do wykładu dr inż. Andrzeja Giniewicza[^2]. Naszym zadaniem jest analiza wybranych danych rzeczywistych, która posłuży do rozwiązania ustalonych problemów badawczych.
+Do wykonania naszego raportu wykorzystamy pakiet R wraz z jego wybranymi bibliotekami, których krótki opis zawarliśmy w Tabeli (\ref{tab:pakiety}).
 
 ```{r}
 
@@ -167,7 +167,7 @@ knitr::kable(df[1:6,], "latex", caption = "Pierwsze rzędy zestawu danych", labe
   kable_styling(latex_options = c("scale_down", "hold_position"))
 ```
 
-Kilka pierwszych rzędów przekształconego w ten sposób zestawu umieszczamy w tabeli \ref{tab:head}. Zauważmy, że$~$estymowane statystyki sumują się do *Szczęścia*. Po użyciu funkcji *unique* dla kolumn Państw i kontynentów dowiadujemy się, że mamy do dyspozycji dane pochodzące ze 132 państw, rozmieszczonych na wszystkich kontynentach zebrane w latach 2015-2020. Zobaczmy jak na przestrzeni czasu wyglądało *Szczęście* dla każdego z kontynentów na wykresie \ref{fig:trend}. Kolorem czerwonym została oznaczona średnia z całego świata.
+Kilka pierwszych rzędów przekształconego w ten sposób zestawu umieszczamy w tabeli (\ref{tab:head}). Zauważmy, że$~$estymowane statystyki sumują się do *Szczęścia*. Po użyciu funkcji *unique* dla kolumn Państw i kontynentów dowiadujemy się, że mamy do dyspozycji dane pochodzące ze 132 państw, rozmieszczonych na wszystkich kontynentach zebrane w latach 2015-2020. Zobaczmy jak na przestrzeni czasu wyglądało *Szczęście* dla każdego z kontynentów na wykresie (\ref{fig:trend}). Kolorem czerwonym została oznaczona średnia z całego świata.
 
 ```{r, fig.cap="\\label{fig:trend}Średnie szczęście na przestrzeni lat", out.width="60%", fig.align = "center"}
 r
@@ -176,7 +176,7 @@ r
 
 
 
-Widzimy, że dane nieznacznie fluktuują zatem uśrednimy je w celu bardziej przejrzystej analizy. Średni poziom _szczęścia_ każdego państwa umieszczamy na wykresie \ref{fig:szczęście}, oznaczając kolorem kontynent w którym się ono znajduje.
+Widzimy, że dane nieznacznie fluktuują zatem uśrednimy je w celu bardziej przejrzystej analizy. Średni poziom _szczęścia_ każdego państwa umieszczamy na wykresie (\ref{fig:szczęście}), oznaczając kolorem kontynent w którym się ono znajduje.
 Zauważamy, że w niższej strefie dominują kraje z Afryki, natomiast w wyższej - Australii\ i\  Europy. Nanieśmy więc średni poziom _szczęścia_ na mapę świata (rys. \ref{fig:świat}). Nasze obserwacje potwierdzają się. Jest stosunkowo dużo braków danych w Afryce. Biorąc pod uwagę jednak to, że dosyć podobnie rozłożony jest tam średni poziom _szczęścia_, nie traktujemy tego jako problem.
 
 
@@ -201,18 +201,18 @@ Obie wymienione wyżej korelacje przyjmują wartości z przedziału od -1 do 1. 
 t
 ```
 
-Wykres \ref{fig:korelacje} przedstawia wielkość korelacji Pearsona i Spearmana między poziomem _szczęścia_ a czynnikami z\ naszego zbioru danych. Oba dają podobne wyniki, zatem możemy się spodziewać zależności liniowej. Aby lepiej przyjrzeć się występującym zależnościom, przedstawimy badane dane na wykresach punktowych (rys.\ \ref{fig:scatters}).
+Wykres (\ref{fig:korelacje}) przedstawia wielkość korelacji Pearsona i Spearmana między poziomem _szczęścia_ a czynnikami z\ naszego zbioru danych. Oba dają podobne wyniki, zatem możemy się spodziewać zależności liniowej. Aby lepiej przyjrzeć się występującym zależnościom, przedstawimy badane dane na wykresach punktowych (rys.\ \ref{fig:scatters}).
 
 ```{r, fig.cap="\\label{fig:scatters}Zestawienie szczęścia wobec poszczególnych czynników", out.width="60%", fig.align = "center"}
 w
 ```
-Na wykresach \ref{fig:scatters} traktujemy poszczególne czynniki jako zmienne objaśniające, natomiast _szczęście_ jako zmienną objaśnianą. Dodatkowo prosta jest wynikiem zastosowania regresji liniowej. Patrząc na otrzymane wykresy oraz korelacje widzimy, że największą zależność ze _szczęściem_ mają _rodzina_, _zdrowie_ i _PKB na osobę_, czyli powszechnie uznawane wartości. Jeżeli te czynniki będą utrzymane na wysokim poziomie, spodziewamy się że szczęście również takie będzie. Najgorzej w zestawieniu wypada _szczodrość_ - nie możemy wnioskować czy jeżeli ta będzie rosnąć, rosnąć bedzie również nasza zmienna obijaśniana, regresja liniowa w tym przypadku nie jest uzasadniona. Uwagę może zwrócić również fakt, że korelacja _szczęścia_ z _korupcją_ jest istotnie wyższa niż korelacja _szczęścia_ z _zaufaniem do rządu_, gdzie oba czynniki mierzą poziom korupcji, przy czym to drugie bada jej wpływ na _szczęście_. Pokazuje nam to, że nie zawsze korelacja oznacza przyczynowość.
+Na wykresie (\ref{fig:scatters}) traktujemy poszczególne czynniki jako zmienne objaśniające, natomiast _szczęście_ jako zmienną objaśnianą. Dodatkowo prosta jest wynikiem zastosowania regresji liniowej. Patrząc na otrzymane wykresy oraz korelacje widzimy, że największą zależność ze _szczęściem_ mają _rodzina_, _zdrowie_ i _PKB na osobę_, czyli powszechnie uznawane wartości. Jeżeli te czynniki będą utrzymane na wysokim poziomie, spodziewamy się że szczęście również takie będzie. Najgorzej w zestawieniu wypada _szczodrość_ - nie możemy wnioskować czy jeżeli ta będzie rosnąć, rosnąć bedzie również nasza zmienna obijaśniana, regresja liniowa w tym przypadku nie jest uzasadniona. Uwagę może zwrócić również fakt, że korelacja _szczęścia_ z _korupcją_ jest istotnie wyższa niż korelacja _szczęścia_ z _zaufaniem do rządu_, gdzie oba czynniki mierzą poziom korupcji, przy czym to drugie bada jej wpływ na _szczęście_. Pokazuje nam to, że nie zawsze korelacja oznacza przyczynowość.
 
 ```{r, message=FALSE, fig.cap="\\label{fig:zaufanie do rządu a korupcja}Zestawienie statystyk dotyczących korupcji",out.width="60%", fig.align = "center"}
 x
 ```
 
-Aby zobaczyć dokładniej jak ma się _korupcja_ do _zaufania do rządu_, przyjrzymy się wykresowi \ref{fig:zaufanie do rządu a korupcja}. Widzimy, że gdy korupcja jest wysoka (tzn. przyjmuje niskie wartości na osi), jej wpływ na szczęście jest nikły, ale nie występuje tu oczywista zależność, natomiast gdy zaczyna ona spadać (dla wartości większych od 50), jej wpływ na szczęście staje się bardziej istotny. W tym przypadku możemy próbować doszukiwać się zależności innej niż liniowa.
+Aby zobaczyć dokładniej jak ma się _korupcja_ do _zaufania do rządu_, przyjrzymy się wykresowi (\ref{fig:zaufanie do rządu a korupcja}). Widzimy, że gdy korupcja jest wysoka (tzn. przyjmuje niskie wartości na osi), jej wpływ na szczęście jest nikły, ale nie występuje tu oczywista zależność, natomiast gdy zaczyna ona spadać (dla wartości większych od 50), jej wpływ na szczęście staje się bardziej istotny. W tym przypadku możemy próbować doszukiwać się zależności innej niż liniowa.
 
 # Podsumowanie
 
