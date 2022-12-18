@@ -93,14 +93,12 @@ for(k in colnames(df2)){
   }
 }
 w <- plot_grid(plotlist = p)
-v <- plot_grid(plotlist = h)
 x <- ggplot(df2, aes(x = Korupcja, y = `Zaufanie do rządu`))+ 
   geom_point()+
   geom_smooth()
 #cor(df2$`Zaufanie do rządu`,df2$Korupcja)
 ```
 
-\newpage
 
 \tableofcontents
 
@@ -111,7 +109,6 @@ x <- ggplot(df2, aes(x = Korupcja, y = `Zaufanie do rządu`))+
 Niniejsze sprawozdanie zostało sporządzone w ramach laboratorium Pakietów Statystycznych, prowadzonych przez dr inż. Daniela Kucharczyka[^1], do wykładu dr Andrzeja Giniewicza[^2]. Naszym zadaniem jest analiza wybranych danych rzeczywistych, która posłuży do rozwiązania ustalonego problemu badawczego.
 Do wykonania naszego raportu wykorzystamy pakiet R wraz z jego wybranymi bibliotekami, których krótki opis zawarliśmy w Tabeli \ref{tab:pakiety}.
 
-\begin{center}
 ```{r}
 
 nazwa <- c("corrplot",
@@ -131,7 +128,7 @@ Packages <- data.frame(nazwa, opis)
 knitr::kable(Packages,"latex", align = c("c", "c"), caption = "Biblioteki używane w raporcie", label = "pakiety") %>%
   kable_styling(latex_options=c("hold_position", "scale_down"))
 ```
-\end{center}
+
 ## Przedstawienie danych
 
 Wykorzystamy dane zestawiające estymowany wpływ poszczególnych zmiennych na Poziom Szczęścia społeczeństwa w poszczególnych krajach w latach 2015-2020 zebranych przez instytut Gallupa[^3], wraz z postrzeganym poziomem korupcji CPI (z ang. _corruption perceptions index_) pozyskanymi przez pozarządową organizację Transparency International[^4] w 2015 roku. Konkretny zestaw pobraliśmy z platformy Kaggle, gdzie jeden z użytkowników połączył raporty w jeden zbiór[^5] składający się z następujących zmiennych:
@@ -150,14 +147,9 @@ Wykorzystamy dane zestawiające estymowany wpływ poszczególnych zmiennych na P
 \item \textbf{Korupcja} - Postrzegany poziom korupcji w państwie. Im wyższa punktacja, tym niższa korupcja.
 \end{itemize}
 
-```{r, fig.cap="\\label{fig:f1}Poziom szczęścia na świecie", out.width="60%", fig.align = "center"}
-v
-```
-
 ## Cel analizy
-
-Naszym pierwszorzędnym priorytetem będzie znalezienie korelacji między poziomem _korupcji_ a poziomem _szczęścia_. Oczekujemy, że w państwach, gdzie żyje się gorzej, panuje wysoka korupcja. W tym celu zbadamy globalny poziom _szczęścia_ i znajdziemy kraje, w których przyjmuje on skrajne wartości. Następnie przyjrzymy się jak poszczególne statystyki wpływają na _szczęście_ dla tych państw. Dodatkowo sprawdzimy, jak zmieniał się estymowany wpływ korupcji na _szczęście_ w czasie.
-Na podstawie tych informacji wyciągniemy wnioski.
+Sprawdzimy jak zmienia się globalny poziom _szczęścia_ na przestrzeni lat. Następnie znajdziemy miejsca, w których uśrednione wartości są najmniejsze lub największe. Poza tym, wyznaczymy i zobrazujemy korelację pomiędzy _szczęsciem_ a pozostałymi _statystykami_.
+na koniec zbadamy czy stopień w jakim państwo jest skorumpowane, ma wpływ na jego poziom szczęścia.
 
 [^1]:: \href{http://prac.im.pwr.edu.pl/~giniew/doku.php}{http://prac.im.pwr.edu.pl/~giniew/doku.php}
 [^2]:: \href{http://prac.im.pwr.edu.pl/~kucharczyk/}{https://dkucharc.github.io/academic/}
@@ -165,11 +157,9 @@ Na podstawie tych informacji wyciągniemy wnioski.
 [^4]:: \href{https://www.transparency.org/en/cpi/2021}{https://www.transparency.org/en/cpi/2021}
 [^5]:: \href{https://www.kaggle.com/datasets/eliasturk/world-happiness-based-on-cpi-20152020}{https://www.kaggle.com/datasets/eliasturk/world-happiness-based-on-cpi-20152020}
 
-\newpage
-
 # Analiza i wizualizacja danych
 
-Najpierw zobaczmy jak wyglądają dane. Wnioskujemy z opisu danych (zrobić odniesienie), że kolumny _Rodzina_ i _Wsparcie społeczne_ mówą o tym samym i uzupełniają się wzajemnie. W związku z tym wartości z _wsparcia_ dopisujemy do _rodziny_ i usuwamy niepotrzebną kolumnę. Braki danych w zestawie są opisane jako zera. Do znalezienia ich użyjemy funkcji _which_ użytej do każdej kolumny naszego zbioru. Zwróci ona pozycję zer. Gdzieniegdzie te braki danych mogą nieść pewną dodatkową informację. Przykładowo, jeśli napotkamy zera w kolumnie *Wolność* może oznaczać brak możliwości umieszczenia konkretnego pytania w ankiecie z powodów politycznych. Zamieniamy te wartości na *NA*, by nie przeszkadzały w liczeniu średnich wartości w dalszej części sprawozdania. Kilka pierwszych rzędów przekształconego w ten sposób zestawu umieszczamy w tabeli \ref{tab:head}. Zauważmy, że estymowane statystyki sumują się do *Szczęścia*. Po użyciu funkcji *unique* dla kolumn Państw i kontynentów dowiadujemy się, że mamy do dyspozycji dane pochodzące ze 132 państw, rozmieszczonych na wszystkich kontynentach zebrane w latach 2015-2020. Zobaczmy jak na przestrzeni czasu wyglądało *Szczęście* dla każdego z kontynentów \ref{fig:trend}. Kolorem czerwonym została oznaczona średnia z całego świata.
+Najpierw zobaczmy jak wyglądają dane. Wnioskujemy z opisu danych [^5], że kolumny _Rodzina_ i _Wsparcie społeczne_ mówą o tym samym i uzupełniają się wzajemnie. W związku z tym wartości z _wsparcia_ dopisujemy do _rodziny_ i usuwamy niepotrzebną kolumnę. Braki danych w zestawie są opisane jako zera. Do znalezienia ich użyjemy funkcji _which_ użytej do każdej kolumny naszego zbioru. Zwróci ona pozycję zer. Gdzieniegdzie te braki danych mogą nieść pewną dodatkową informację. Przykładowo, jeśli napotkamy zera w kolumnie *Wolność* może oznaczać brak możliwości umieszczenia konkretnego pytania w ankiecie z powodów politycznych. Zamieniamy te wartości na *NA*, by nie przeszkadzały w liczeniu średnich wartości w dalszej części sprawozdania. Kilka pierwszych rzędów przekształconego w ten sposób zestawu umieszczamy w tabeli \ref{tab:head}. Zauważmy, że estymowane statystyki sumują się do *Szczęścia*. Po użyciu funkcji *unique* dla kolumn Państw i kontynentów dowiadujemy się, że mamy do dyspozycji dane pochodzące ze 132 państw, rozmieszczonych na wszystkich kontynentach zebrane w latach 2015-2020. Zobaczmy jak na przestrzeni czasu wyglądało *Szczęście* dla każdego z kontynentów \ref{fig:trend}. Kolorem czerwonym została oznaczona średnia z całego świata.
 
 ```{r, fig.cap="\\label{fig:trend}Średnie szczęście na przestrzeni lat", out.width="60%", fig.align = "center"}
 r
@@ -179,7 +169,7 @@ r
 
 
 Widzimy, że dane nieznacznie fluktuują zatem uśrednimy je w celu bardziej przejrzystej analizy. Średni _poziom szczęścia_ każdego państwa umieszczamy na wykresie \ref{fig:szczęście}, oznaczając kolorem kontynent w którym się ono znajduje.
-Zauważamy, że w niższej strefie dominują kraje z Afryki i Azji, natomiast w wyższej - Australii i Ameryki Północnej. Nanieśmy więc średni _poziom szczęścia_ na mapę świata (rys. \ref{fig:świat}). Nasze przypuszczenia się potwierdzają. Jest stosunkowo dużo braków danych w Afryce. Biorąc pod uwagę jednak to, że dosyć podobnie rozłożony jest tam średni _poziom szczęścia_, nie traktujemy tego jako problem. Na uwagę zasługuje Afganistan, który stanowi pewnego rodzaju ciemną wyspę na tle Azji. Podobnie Ukraina na tle Europy.
+Zauważamy, że w niższej strefie dominują kraje z Afryki i Azji, natomiast w wyższej - Australii i Ameryki Północnej. Nanieśmy więc średni _poziom szczęścia_ na mapę świata (rys. \ref{fig:świat}). Nasze przypuszczenia się potwierdzają. Jest stosunkowo dużo braków danych w Afryce. Biorąc pod uwagę jednak to, że dosyć podobnie rozłożony jest tam średni _poziom szczęścia_, nie traktujemy tego jako problem.
 
 
 ```{r, echo=FALSE, warning=FALSE}
@@ -197,11 +187,9 @@ s
 ```
 
 
-```{r, fig.cap="\\label{fig:świat}Poziom szczęścia na świecie", out.width="60%", fig.align = "center"}
+```{r, fig.cap="\\label{fig:świat}Poziom szczęścia na świecie", out.width="70%", fig.align = "center"}
 u
 ```
-
-
 Przejdźmy teraz do analizy korelacji między poziomem _szczęścia_ a wybranymi czynnikami. Przypomnijmy po krótce na czym będą polegały użyte w raporcie metody.
 \begin{itemize}
 \item {Korelacja Pearsona} mierzy stopień zależności liniowej pomiędzy dwoma zmiennymi.
@@ -221,9 +209,18 @@ w
 ```
 Na wykresach \ref{fig:scatters} traktujemy poszczególne czynniki jako zmienne opisujące, natomiast _szczęście_ jako zmienną opisywaną. Dodatkowo prosta jest wynikiem zastosowania regresji liniowej. Patrząc na otrzymane wykresy oraz korelacje widzimy, że największą zależność ze _szczęściem_ mają _rodzina_, _zdrowie_ i _PKB na osobę_, czyli powszechnie uznawane wartości. Jeżeli te czynniki będą utrzymane na wysokim poziomie, spodziewamy się że szczęście również takie będzie. Najgorzej w zestawieniu wypada _szczodrość_ - nie możemy wnioskować czy jeżeli ta będzie rosnąć, rosnąć bedzie również nasza zmienna opisywana, regresja liniowa w tym przypadku nie jest uzasadniona. Uwagę może zwrócić również fakt, że korelacja _szczęścia_ z _korupcją_ jest istotnie wyższa niż korelacja _szczęścia_ z _zaufaniem do rządu_, gdzie oba czynniki mierzą poziom korupcji, przy czym to drugie bada jej wpływ na _szczęście_. Pokazuje nam to, że nie zawsze korelacja oznacza przyczynowość.
 
-```{r, fig.cap="\\label{fig:zaufanie do rządu a korupcja}Zestawienie statystyk dotyczących korupcji", out.width="60%", fig.align = "center",warning=FALSE}
+```{r, message=FALSE, fig.cap="\\label{fig:zaufanie do rządu a korupcja}Zestawienie statystyk dotyczących korupcji",out.width="60%", fig.align = "center"}
 x
 ```
+\newpage
+
 Aby zobaczyć dokładniej jak ma się _korupcja_ do _zaufania do rządu_, przyjrzymy się wykresowi \ref{fig:zaufanie do rządu a korupcja}. Widzimy, że gdy korupcja jest wysoka (tzn. przyjmuje niskie wartości na osi), jej wpływ na szczęście jest nikły, ale nie występuje tu oczywista zależność, natomiast gdy zaczyna ona spadać (dla wartości większych od 50), jej wpływ na szczęście staje się bardziej istotny. W tym przypadku możemy próbować doszukiwać się zależności innej niż liniowa, chociażby oznaczonej.
 
 # Podsumowanie
+
+Z naszej analizy wynika, że globalny poziom szczęścia nie ulegał istotnym zmianom na przestrzeni lat 2015-2020.
+Największym szczęściem cieszą się Europejczycy, choć Ukraina jest krajem który niestety odbiega od średniej
+na tym kontynencie. Podobnie Afganistan mocno wyróżnia się w swoim rejonie, ale aby dokładnie zbadać przyczyny takich sytuacji 
+potrzeba więcej informacji. Najniższym średnim poziomem szczęścia cechowały się zbadane kraje na terytorium Afryki.
+Jak pisaliśmy wyżej największą korelację ze szczęściem mają takie czynniki jak _PKB na osobę_, _zdrowie_ oraz _rodzina_.
+Mimo, że korelacja korupcji z poziomem szczęścia jest dość wysoka, nie przekłada się to bezpośrednio na jej wpływ na poziom szczęścia. 
