@@ -21,16 +21,15 @@ library(dplyr)
 library(ggplot2)
 library(rnaturalearth)
 library(rnaturalearthdata)
-library(tigerstats)
 
 
 df <- read.csv("Data\\WorldHappiness_Corruption_2015_2020.csv")
 df$family <- df$family + df$social_support  
-df <- subset(df, select = -c(social_support,dystopia_residual))
+df <- subset(df, select = -c(social_support))
 apply(df == 0, 2, which)
 df[df==0] <- NA
 #View(df)
-colnames(df) <- c("Państwo", "Szczęście", "PKB na jednego mieszkańca", "Rodzina", "Zdrowie", "Wolność", "Szczodrość", "Zaufanie do rządu","Kontynent","Rok", "Korupcja")
+colnames(df) <- c("Państwo", "Szczęście", "PKB na osobę", "Rodzina", "Zdrowie", "Wolność", "Szczodrość", "Zaufanie do rządu","Dystopia", "Kontynent","Rok", "Korupcja")
 #View(df)
 
 
@@ -40,6 +39,7 @@ r <- ggplot(q, aes(x=Rok, y=Szczęście, shape= Kontynent)) +
   stat_summary(fun = "mean", colour = "red", size = 5, geom = "point",shape = "o") +
   theme(legend.position="top")
 
+q_mean <- aggregate(cbind(Szczęście,`PKB na osobę`,Rodzina, Zdrowie, Wolność, Szczodrość, `Zaufanie do rządu`, Dystopia, Korupcja) ~ Kontynent, data = df, FUN = mean)
 
 #Uśredniony df
 df2 <- aggregate(df, list(df$Państwo), mean, na.rm = TRUE)
@@ -54,41 +54,20 @@ s <- ggplot(df2, aes(y = Szczęście, x = reorder(Państwo,Szczęście),fill=Kon
   theme(legend.position="top") + xlab("")
 
 #View(df2)
-#corr wszystkich
-res <- cor(df2[,c(2:9)], use = "complete.obs" )
-corrplot(res, type = "upper", order = "hclust", 
-         tl.col = "black", tl.srt = 45)
-
-#corr wszystkie z szcesciem pearson
-corr_pearson <- cor(df2[,c(3:9)], df2$Szczęście, use = "complete.obs")
-corr_df_pearson <- data.frame(labels(corr_pearson),corr_pearson)
-colnames(corr_df_pearson) <- c("status","corr_method","corr")
-corr_df_pearson$corr_method <- "pearson"
-ggplot(corr_df_pearson, aes(x=reorder(status,corr_pearson),y=corr_pearson)) +
-  geom_bar(stat="identity", width=0.5)
-
-#corr kendall
-corr_kendall <- cor(df2[,c(3:9)], df2$Szczęście, use = "complete.obs",method = "kendall")
-corr_df_kendall <- data.frame(labels(corr_kendall),corr_kendall)
-colnames(corr_df_kendall) <- c("status","corr_method","corr")
-corr_df_kendall$corr_method <- "kendall"
-ggplot(corr_df_kendall, aes(x=reorder(status,corr_kendall),y=corr_kendall)) +
-  geom_bar(stat="identity", width=0.5)
-
-#corr spearman
-corr_spearman <- cor(df2[,c(3:9)], df2$Szczęście, use = "complete.obs",method = "spearman")
-corr_df_spearman <- data.frame(labels(corr_spearman),corr_spearman)
-colnames(corr_df_spearman) <- c("status","corr_method","corr")
-corr_df_spearman$corr_method <- "spearman"
-ggplot(corr_df_spearman, aes(x=reorder(status,corr_spearman),y=corr_spearman)) +
-  geom_bar(stat="identity", width=0.5)
-
-# 3 CORR W 1
-corr_df_all <- rbind(corr_df_pearson,corr_df_kendall,corr_df_spearman)
+#corr pętla
+corr_df_all <- data.frame()
+metody <- c("pearson","spearman")
+for(m in metody){
+  corr <- cor(df2[,c(3:10)], df2$Szczęście, use = "complete.obs",method = m)
+  corr_df <- data.frame(labels(corr),corr)
+  colnames(corr_df) <- c("status","corr_method","corr")
+  corr_df$corr_method <- m
+  corr_df_all <- rbind(corr_df_all,corr_df)
+}
 t <- ggplot(corr_df_all, aes(x=reorder(status,corr),y=corr,fill=corr_method)) +
   geom_bar(position="dodge",stat="identity", width=0.5)+
-  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+
-  theme(legend.position="top") + xlab("") + scale_fill_discrete(name = "Metoda korelacji")
+  theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1))+
+  theme(legend.position="top") + xlab("") + scale_fill_discrete(name = "Metoda korelacji") +ylab("korelacja")
 
 
 #świat bajer
@@ -139,39 +118,40 @@ nazwa <- c("corrplot",
            "dplyr",
            "ggplot2",
            "rnaturalearth",
-           "rnaturalearthdata",
-           "tigerstats")
-opis <- c("lines", 
-                  "lines",  
-                  "lines",
-                  "lines", 
-                  "lines",  
-                  "lines",
-                  "lines")
+           "rnaturalearthdata")
+opis <- c("Wizualizacja korelacji między zmiennymi w postaci macierzy korelacji lub wykresu słupkowego.", 
+                  "Łatwiejsze komponowanie wielu wykresów na jednym rysunku.",  
+                  "Wykonywanie prostych i wydajnych operacji na tabelach danych.",
+                  "Tworzenie estetycznych i profesjonalnych wykresów i wizualizacji danych.", 
+                  "Pobiera i przetwarza dane o kształcie i granicach krajów oraz innych obszarów geograficznych na całym świecie.",  
+                  "Dostarcza dodatkowo wiele innych danych geograficznych.")
 
 Packages <- data.frame(nazwa, opis)
 knitr::kable(Packages,"latex", align = c("c", "c"), caption = "Biblioteki używane w raporcie", label = "pakiety") %>%
-  kable_styling(latex_options="hold_position")
+  kable_styling(latex_options=c("hold_position", "scale_down"))
 ```
 \end{center}
-
 ## Przedstawienie danych
 
-Wykorzystamy dane zestawiające estymowany wpływ poszczególnych zmiennych na Poziom Szczęścia społeczeństwa w poszczególnych krajach w latach 2015-2020 zebranych przez instytut Gallupa[^3], wraz z postrzeganym poziomem korupcji (CPI) pozyskanymi przez pozarządową organizację Transparency International[^4] w 2015 roku. Konkretny zestaw pobraliśmy z platformy Kaggle, gdzie jeden z użytkowników połączył raporty w jeden zbiór[^5] składający się z następujących zmiennych:
+Wykorzystamy dane zestawiające estymowany wpływ poszczególnych zmiennych na Poziom Szczęścia społeczeństwa w poszczególnych krajach w latach 2015-2020 zebranych przez instytut Gallupa[^3], wraz z postrzeganym poziomem korupcji CPI (z ang. _corruption perceptions index_) pozyskanymi przez pozarządową organizację Transparency International[^4] w 2015 roku. Konkretny zestaw pobraliśmy z platformy Kaggle, gdzie jeden z użytkowników połączył raporty w jeden zbiór[^5] składający się z następujących zmiennych:
 
 \begin{itemize}
 \item \textbf{Poziom szczęścia} - średnia odpowiedzi na pytanie dotyczące oceny życia,
 \item \textbf{Państwo} - nazwa państwa do którego odnoszą się pozostałe dane,
 \item \textbf{Kontynent} - kontynent na którym znajduje się dane państwo,
 \item \textbf{Rok} - rok z którego pochodzą zebrane dane,
-\item \textbf{PKB na jednego mieszkańca} - zakres, w jakim PKB na mieszkańca przyczynia się do obliczenia poziomu szczęścia. Jest to stosunek wartości PKB w cenach bieżących do liczby ludności danego obszaru,
-\item \textbf{Rodzina} -stopień, w jakim rodzina przyczynia się do obliczenia poziomu szczęścia. Jest to średnia odpowiedzi w danym kraju, na pytanie GWP "Czy będąc w potrzebie, możesz zawsze liczyć na krewnych bądź przyjaciół?",
+\item \textbf{PKB na osobę} - zakres, w jakim PKB na mieszkańca przyczynia się do obliczenia poziomu szczęścia. Jest to stosunek wartości PKB w cenach bieżących do liczby ludności danego obszaru,
+\item \textbf{Rodzina} -stopień, w jakim rodzina przyczynia się do obliczenia poziomu szczęścia. Jest to średnia odpowiedzi w danym kraju, na pytanie GWP ,,Czy będąc w potrzebie, możesz zawsze liczyć na krewnych bądź przyjaciół?'',
 \item \textbf{Zdrowie} -stopień, w jakim oczekiwana długość życia przyczynia się do obliczenia poziomu szczęścia. Estymowana długość życia, obliczana na podstawie danych Światowej Organizacji Zdrowia,
-\item \textbf{Wolność} -stopień, w jakim wolność przyczynia się do obliczenia poziomu szczęścia. Uśredniona odpowiedź na pytanie GWP "Czy jesteś usatysfakcjonowany z poziomu wolności wyboru, do tego co chcesz robić w swoim życiu?",
-\item \textbf{Szczodrość} -stopień, w jakim szczodrość przyczynia się do obliczenia poziomu szczęścia. Równa residuum z regresji średniej krajowej odpowiedzi na pytanie "Czy w ostatnim miesiącu przekazałeś pieniądze na cele charytatywne?". Przeliczony w stosunku do PKB na osobę,
-\item \textbf{Zaufanie do rządu} - stopień, w jakim zaufanie do rządu przyczynia się do obliczenia poziomu szczęścia. Wnioskowany na podstawie odpowiedzi na pytania "Czy korupcja jest rozpowszechniona w rządzie?" oraz "Czy korupcja jest rozpowszechniona w przedsiębiorstwach?". W przypadku braku danych dotyczących korupcji w rządzie, jako ogólną miarę postrzegania korupcji stosuje się percepcję korupcji w biznesie.
+\item \textbf{Wolność} -stopień, w jakim wolność przyczynia się do obliczenia poziomu szczęścia. Uśredniona odpowiedź na pytanie GWP ,,Czy jesteś usatysfakcjonowany z poziomu wolności wyboru, do tego co chcesz robić w swoim życiu?'',
+\item \textbf{Szczodrość} -stopień, w jakim szczodrość przyczynia się do obliczenia poziomu szczęścia. Równa residuum z regresji średniej krajowej odpowiedzi na pytanie ,,Czy w ostatnim miesiącu przekazałeś pieniądze na cele charytatywne?''. Przeliczony w stosunku do PKB na osobę,
+\item \textbf{Zaufanie do rządu} - stopień, w jakim zaufanie do rządu przyczynia się do obliczenia poziomu szczęścia. Wnioskowany na podstawie odpowiedzi na pytania ,,Czy korupcja jest rozpowszechniona w rządzie?'' oraz ,,Czy korupcja jest rozpowszechniona w przedsiębiorstwach?''. W przypadku braku danych dotyczących korupcji w rządzie, jako ogólną miarę postrzegania korupcji stosuje się percepcję korupcji w biznesie.
 \item \textbf{Korupcja} - Postrzegany poziom korupcji w państwie. Im wyższa punktacja, tym niższa korupcja.
 \end{itemize}
+
+```{r, fig.cap="\\label{fig:f1}Poziom szczęścia na świecie", out.width="60%", fig.align = "center"}
+v
+```
 
 ## Cel analizy
 
@@ -188,8 +168,17 @@ Na podstawie tych informacji wyciągniemy wnioski.
 
 # Analiza i wizualizacja danych
 
-Najpierw zobaczmy jak wyglądają dane. Wnioskujemy z opisu danych (zrobić odniesienie), że kolumny _Rodzina_ i _Wsparcie społeczne_ mówą o tym samym i uzupełniają się wzajemnie. W związku z tym wartości z _wsparcia_ dopisujemy do _rodziny_ i usuwamy niepotrzebną kolumnę. Braki danych w zestawie są opisane jako zera. Do znalezienia ich użyjemy funkcji _which_ użytej do każdej kolumny naszego zbioru. Zwróci ona pozycję zer. Gdzieniegdzie te braki danych mogą nieść pewną dodatkową informację. Przykładowo, jeśli napotkamy zera w kolumnie *Wolność* może oznaczać brak możliwości umieszczenia konkretnego pytania w ankiecie z powodów politycznych. Zamieniamy te wartości na *NA*, by nie przeszkadzały w liczeniu średnich wartości w dalszej części sprawozdania. Kilka pierwszych rzędów przekształconego w ten sposób zestawu umieszczamy w tabeli \ref{tab:head}. Zauważmy, że estymowane statystyki sumują się do *Szczęścia*. Po użyciu funkcji *unique* dla kolumn Państw i kontynentów dowiadujemy się, że mamy do dyspozycji dane pochodzące ze 132 państw, rozmieszczonych na wszystkich kontynentach. Uśredniamy dane dla każdego z nich i średni _poziom szczęścia_ umieszczamy na wykresie \ref{fig:szczęście}, Kolorem rozróżniamy kontynenty do których należą państwa.
-Zauważamy, że w niższej strefie dominują kraje z Afryki i Azji, natomiast w wyższej - Australii i Ameryki Północnej. Nanieśmy więc średni _poziom szczęścia_ na mapę świata (rys. \ref{fig:świat}). Nasze przypuszczenia się potwierdzają. Jest stosunkowo braków danych w Afryce. Biorą pod uwagę jednak to, że dosyć podobnie rozłożony jest tam średni _poziom szczęścia_, nie traktujemy to jako problem. Na uwagę zasługuje Afganistan, który stanowi pewnego rodzaju ciemną wyspę na tle Azji. Podobnie Ukraina na tle Europy.
+Najpierw zobaczmy jak wyglądają dane. Wnioskujemy z opisu danych (zrobić odniesienie), że kolumny _Rodzina_ i _Wsparcie społeczne_ mówą o tym samym i uzupełniają się wzajemnie. W związku z tym wartości z _wsparcia_ dopisujemy do _rodziny_ i usuwamy niepotrzebną kolumnę. Braki danych w zestawie są opisane jako zera. Do znalezienia ich użyjemy funkcji _which_ użytej do każdej kolumny naszego zbioru. Zwróci ona pozycję zer. Gdzieniegdzie te braki danych mogą nieść pewną dodatkową informację. Przykładowo, jeśli napotkamy zera w kolumnie *Wolność* może oznaczać brak możliwości umieszczenia konkretnego pytania w ankiecie z powodów politycznych. Zamieniamy te wartości na *NA*, by nie przeszkadzały w liczeniu średnich wartości w dalszej części sprawozdania. Kilka pierwszych rzędów przekształconego w ten sposób zestawu umieszczamy w tabeli \ref{tab:head}. Zauważmy, że estymowane statystyki sumują się do *Szczęścia*. Po użyciu funkcji *unique* dla kolumn Państw i kontynentów dowiadujemy się, że mamy do dyspozycji dane pochodzące ze 132 państw, rozmieszczonych na wszystkich kontynentach zebrane w latach 2015-2020. Zobaczmy jak na przestrzeni czasu wyglądało *Szczęście* dla każdego z kontynentów \ref{fig:trend}. Kolorem czerwonym została oznaczona średnia z całego świata.
+
+```{r, fig.cap="\\label{fig:trend}Średnie szczęście na przestrzeni lat", out.width="60%", fig.align = "center"}
+r
+```
+
+
+
+
+Widzimy, że dane nieznacznie fluktuują zatem uśrednimy je w celu bardziej przejrzystej analizy. Średni _poziom szczęścia_ każdego państwa umieszczamy na wykresie \ref{fig:szczęście}, oznaczając kolorem kontynent w którym się ono znajduje.
+Zauważamy, że w niższej strefie dominują kraje z Afryki i Azji, natomiast w wyższej - Australii i Ameryki Północnej. Nanieśmy więc średni _poziom szczęścia_ na mapę świata (rys. \ref{fig:świat}). Nasze przypuszczenia się potwierdzają. Jest stosunkowo dużo braków danych w Afryce. Biorąc pod uwagę jednak to, że dosyć podobnie rozłożony jest tam średni _poziom szczęścia_, nie traktujemy tego jako problem. Na uwagę zasługuje Afganistan, który stanowi pewnego rodzaju ciemną wyspę na tle Azji. Podobnie Ukraina na tle Europy.
 
 
 ```{r, echo=FALSE, warning=FALSE}
@@ -197,30 +186,41 @@ knitr::kable(df[1:6,], "latex", caption = "Pierwsze rzędy zestawu danych", labe
   kable_styling(latex_options = "scale_down")
 ```
 
+```{r, echo=FALSE, warning=FALSE}
+knitr::kable(q_mean, "latex", caption = "Średnie wartości statystyk na kontynentach", label = "meany") %>% 
+  kable_styling(latex_options = "scale_down")
+```
+
 ```{r, fig.cap="\\label{fig:szczęście}Poziom szczęścia dla danych krajów", out.width="100%", fig.align = "center"}
 s
 ```
+
 
 ```{r, fig.cap="\\label{fig:świat}Poziom szczęścia na świecie", out.width="60%", fig.align = "center"}
 u
 ```
 
-```{r, fig.cap="\\label{fig:trend}Średnie szczęście na przestrzeni lat", out.width="60%", fig.align = "center"}
-r
-```
+Studium przypadku Ukraina, afganistan, wenezuela.
+
+
+Przejdźmy teraz do analizy korelacji między poziomem szczęścia a wybranymi czynnikami. Przypomnijmy po krótce na czym będą polegały użyte w raporcie metody.
+\begin{itemize}
+\item {Korelacja Pearsona} mierzy stopień zależności liniowej pomiędzy dwoma zmiennymi.
+\item {Korelacja Spearmana} mierzy stopień korelacji pomiędzy dwoma zmiennymi na podstawie ich pozycji w rankingu. Może być obliczana dla danych, które nie są dobrze opisane przez prostą, ale istnieje między nimi jakiś rodzaj zależności.
+\end{itemize}
+Obie wymienione wyżej korelacje przyjmują wartości z przedziału od -1 do 1. Im bliżej zera, tym mniej skorelowane są dane, natomiast im bliżej wartości brzegowych, tym korelacja jest silniejsza (odpowiednio ujemna i dodatnia). 
+
 
 ```{r, fig.cap="\\label{fig:korelacje}Korelacja poziomem szczęścia a wybranymi statystykami", , out.width="60%", fig.align = "center"}
 t
 ```
 
+Wykres \ref{fig:korelacje} przedstawia wielkość korelacji między poziomem szczęścia czynnikami z naszego zbioru danych. 
 
 ```{r, fig.cap="\\label{fig:}Poziom szczęścia na świecie", out.width="60%", fig.align = "center"}
 w
 ```
 
-```{r, fig.cap="\\label{fig:f1}Poziom szczęścia na świecie", out.width="60%", fig.align = "center"}
-v
-```
 
 ```{r, fig.cap="\\label{fig:zaufanie do rządu a korupcja}Zestawienie statystyk dotyczących korupcji", out.width="60%", fig.align = "center"}
 x
@@ -228,6 +228,3 @@ x
 
 
 # Podsumowanie
-
-
-

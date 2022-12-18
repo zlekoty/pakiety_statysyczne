@@ -5,16 +5,15 @@ library(dplyr)
 library(ggplot2)
 library(rnaturalearth)
 library(rnaturalearthdata)
-library(tigerstats)
 
 
 df <- read.csv("Data\\WorldHappiness_Corruption_2015_2020.csv")
 df$family <- df$family + df$social_support  
-df <- subset(df, select = -c(social_support,dystopia_residual))
+df <- subset(df, select = -c(social_support))
 apply(df == 0, 2, which)
 df[df==0] <- NA
 #View(df)
-colnames(df) <- c("Pañstwo", "Szczêœcie", "PKB na jednego mieszkañca", "Rodzina", "Zdrowie", "Wolnoœæ", "Szczodroœæ", "Zaufanie do rz¹du","Kontynent","Rok", "Korupcja")
+colnames(df) <- c("Pañstwo", "Szczêœcie", "PKB na osobê", "Rodzina", "Zdrowie", "Wolnoœæ", "Szczodroœæ", "Zaufanie do rz¹du","Dystopia", "Kontynent","Rok", "Korupcja")
 #View(df)
 
 
@@ -24,6 +23,7 @@ r <- ggplot(q, aes(x=Rok, y=Szczêœcie, shape= Kontynent)) +
   stat_summary(fun = "mean", colour = "red", size = 5, geom = "point",shape = "o") +
   theme(legend.position="top")
 
+q_mean <- aggregate(cbind(Szczêœcie,`PKB na osobê`,Rodzina, Zdrowie, Wolnoœæ, Szczodroœæ, `Zaufanie do rz¹du`, Dystopia, Korupcja) ~ Kontynent, data = df, FUN = mean)
 
 #Uœredniony df
 df2 <- aggregate(df, list(df$Pañstwo), mean, na.rm = TRUE)
@@ -38,41 +38,20 @@ s <- ggplot(df2, aes(y = Szczêœcie, x = reorder(Pañstwo,Szczêœcie),fill=Kontynen
   theme(legend.position="top") + xlab("")
 
 #View(df2)
-#corr wszystkich
-res <- cor(df2[,c(2:9)], use = "complete.obs" )
-corrplot(res, type = "upper", order = "hclust", 
-         tl.col = "black", tl.srt = 45)
-
-#corr wszystkie z szcesciem pearson
-corr_pearson <- cor(df2[,c(3:9)], df2$Szczêœcie, use = "complete.obs")
-corr_df_pearson <- data.frame(labels(corr_pearson),corr_pearson)
-colnames(corr_df_pearson) <- c("status","corr_method","corr")
-corr_df_pearson$corr_method <- "pearson"
-ggplot(corr_df_pearson, aes(x=reorder(status,corr_pearson),y=corr_pearson)) +
-  geom_bar(stat="identity", width=0.5)
-
-#corr kendall
-corr_kendall <- cor(df2[,c(3:9)], df2$Szczêœcie, use = "complete.obs",method = "kendall")
-corr_df_kendall <- data.frame(labels(corr_kendall),corr_kendall)
-colnames(corr_df_kendall) <- c("status","corr_method","corr")
-corr_df_kendall$corr_method <- "kendall"
-ggplot(corr_df_kendall, aes(x=reorder(status,corr_kendall),y=corr_kendall)) +
-  geom_bar(stat="identity", width=0.5)
-
-#corr spearman
-corr_spearman <- cor(df2[,c(3:9)], df2$Szczêœcie, use = "complete.obs",method = "spearman")
-corr_df_spearman <- data.frame(labels(corr_spearman),corr_spearman)
-colnames(corr_df_spearman) <- c("status","corr_method","corr")
-corr_df_spearman$corr_method <- "spearman"
-ggplot(corr_df_spearman, aes(x=reorder(status,corr_spearman),y=corr_spearman)) +
-  geom_bar(stat="identity", width=0.5)
-
-# 3 CORR W 1
-corr_df_all <- rbind(corr_df_pearson,corr_df_kendall,corr_df_spearman)
+#corr pêtla
+corr_df_all <- data.frame()
+metody <- c("pearson","spearman")
+for(m in metody){
+  corr <- cor(df2[,c(3:10)], df2$Szczêœcie, use = "complete.obs",method = m)
+  corr_df <- data.frame(labels(corr),corr)
+  colnames(corr_df) <- c("status","corr_method","corr")
+  corr_df$corr_method <- m
+  corr_df_all <- rbind(corr_df_all,corr_df)
+}
 t <- ggplot(corr_df_all, aes(x=reorder(status,corr),y=corr,fill=corr_method)) +
   geom_bar(position="dodge",stat="identity", width=0.5)+
-  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+
-  theme(legend.position="top") + xlab("") + scale_fill_discrete(name = "Metoda korelacji")
+  theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1))+
+  theme(legend.position="top") + xlab("") + scale_fill_discrete(name = "Metoda korelacji") +ylab("korelacja")
 
 
 #œwiat bajer
