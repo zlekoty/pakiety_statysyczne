@@ -10,7 +10,6 @@ date: "2022-12-18"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.pos = "H")
-library(kableExtra)
 ```
 
 ```{r echo=FALSE, warning=FALSE, include=FALSE}
@@ -19,6 +18,7 @@ library(corrplot)
 library(cowplot)
 library(dplyr)
 library(ggplot2)
+library(kableExtra)
 library(rnaturalearth)
 library(rnaturalearthdata)
 
@@ -38,8 +38,6 @@ r <- ggplot(q, aes(x=Rok, y=Szczęście, shape= Kontynent)) +
   geom_point() +
   stat_summary(fun = "mean", colour = "red", size = 5, geom = "point",shape = "o") +
   theme(legend.position="top")
-
-q_mean <- aggregate(cbind(Szczęście,`PKB na osobę`,Rodzina, Zdrowie, Wolność, Szczodrość, `Zaufanie do rządu`, Dystopia, Korupcja) ~ Kontynent, data = df, FUN = mean)
 
 #Uśredniony df
 df2 <- aggregate(df, list(df$Państwo), mean, na.rm = TRUE)
@@ -98,7 +96,7 @@ x <- ggplot(df2, aes(x = Korupcja, y = `Zaufanie do rządu`))+
   geom_smooth()
 #cor(df2$`Zaufanie do rządu`,df2$Korupcja)
 ```
-
+\newpage
 
 \tableofcontents
 
@@ -106,7 +104,7 @@ x <- ggplot(df2, aes(x = Korupcja, y = `Zaufanie do rządu`))+
 
 # Wstęp
 
-Niniejsze sprawozdanie zostało sporządzone w ramach laboratorium Pakietów Statystycznych, prowadzonych przez dr inż. Daniela Kucharczyka[^1], do wykładu dr Andrzeja Giniewicza[^2]. Naszym zadaniem jest analiza wybranych danych rzeczywistych, która posłuży do rozwiązania ustalonego problemu badawczego.
+Niniejsze sprawozdanie zostało sporządzone w ramach laboratorium Pakietów Statystycznych, prowadzonych przez dr inż. Daniela Kucharczyka[^1], do wykładu dr Andrzeja Giniewicza[^2]. Naszym zadaniem jest analiza wybranych danych rzeczywistych, która posłuży do rozwiązania ustalonych problemów badawczych.
 Do wykonania naszego raportu wykorzystamy pakiet R wraz z jego wybranymi bibliotekami, których krótki opis zawarliśmy w Tabeli \ref{tab:pakiety}.
 
 ```{r}
@@ -115,14 +113,16 @@ nazwa <- c("corrplot",
            "cowplot",
            "dplyr",
            "ggplot2",
+           "kableExtra",
            "rnaturalearth",
            "rnaturalearthdata")
 opis <- c("Wizualizacja korelacji między zmiennymi w postaci macierzy korelacji lub wykresu słupkowego.", 
                   "Łatwiejsze komponowanie wielu wykresów na jednym rysunku.",  
                   "Wykonywanie prostych i wydajnych operacji na tabelach danych.",
-                  "Tworzenie estetycznych i profesjonalnych wykresów i wizualizacji danych.", 
-                  "Pobiera i przetwarza dane o kształcie i granicach krajów oraz innych obszarów geograficznych na całym świecie.",  
-                  "Dostarcza dodatkowo wiele innych danych geograficznych.")
+                  "Tworzenie estetycznych i profesjonalnych wykresów i wizualizacji danych.",
+          "Manipulacja tabelami w R markdown",
+"Pobieranie i przetwarzanie danych o kształcie i granicach krajów oraz innych obszarów geograficznych na całym świecie.",
+                  "Dostarczanie dodatkowych danych geograficznych.")
 
 Packages <- data.frame(nazwa, opis)
 knitr::kable(Packages,"latex", align = c("c", "c"), caption = "Biblioteki używane w raporcie", label = "pakiety") %>%
@@ -131,24 +131,25 @@ knitr::kable(Packages,"latex", align = c("c", "c"), caption = "Biblioteki używa
 
 ## Przedstawienie danych
 
-Wykorzystamy dane zestawiające estymowany wpływ poszczególnych zmiennych na Poziom Szczęścia społeczeństwa w poszczególnych krajach w latach 2015-2020 zebranych przez instytut Gallupa[^3], wraz z postrzeganym poziomem korupcji CPI (z ang. _corruption perceptions index_) pozyskanymi przez pozarządową organizację Transparency International[^4] w 2015 roku. Konkretny zestaw pobraliśmy z platformy Kaggle, gdzie jeden z użytkowników połączył raporty w jeden zbiór[^5] składający się z następujących zmiennych:
+Wykorzystamy dane zestawiające estymowany wpływ zmiennych na Poziom Szczęścia społeczeństwa w poszczególnych krajach w latach 2015-2020 zebranych przez instytut Gallupa[^3], wraz z postrzeganym poziomem korupcji CPI (z ang. _corruption perceptions index_) pozyskanymi przez pozarządową organizację Transparency International[^4]. Konkretny zestaw pobraliśmy z platformy Kaggle, gdzie jeden z użytkowników połączył raporty w jeden zbiór[^5] składający się z następujących zmiennych:
 
 \begin{itemize}
 \item \textbf{Poziom szczęścia} - średnia odpowiedzi na pytanie dotyczące oceny życia,
 \item \textbf{Państwo} - nazwa państwa do którego odnoszą się pozostałe dane,
 \item \textbf{Kontynent} - kontynent na którym znajduje się dane państwo,
 \item \textbf{Rok} - rok z którego pochodzą zebrane dane,
-\item \textbf{PKB na osobę} - zakres, w jakim PKB na mieszkańca przyczynia się do obliczenia poziomu szczęścia. Jest to stosunek wartości PKB w cenach bieżących do liczby ludności danego obszaru,
-\item \textbf{Rodzina} -stopień, w jakim rodzina przyczynia się do obliczenia poziomu szczęścia. Jest to średnia odpowiedzi w danym kraju, na pytanie GWP ,,Czy będąc w potrzebie, możesz zawsze liczyć na krewnych bądź przyjaciół?'',
-\item \textbf{Zdrowie} -stopień, w jakim oczekiwana długość życia przyczynia się do obliczenia poziomu szczęścia. Estymowana długość życia, obliczana na podstawie danych Światowej Organizacji Zdrowia,
-\item \textbf{Wolność} -stopień, w jakim wolność przyczynia się do obliczenia poziomu szczęścia. Uśredniona odpowiedź na pytanie GWP ,,Czy jesteś usatysfakcjonowany z poziomu wolności wyboru, do tego co chcesz robić w swoim życiu?'',
-\item \textbf{Szczodrość} -stopień, w jakim szczodrość przyczynia się do obliczenia poziomu szczęścia. Równa residuum z regresji średniej krajowej odpowiedzi na pytanie ,,Czy w ostatnim miesiącu przekazałeś pieniądze na cele charytatywne?''. Przeliczony w stosunku do PKB na osobę,
+\item \textbf{PKB na osobę} - zakres, w jakim Produkt Krajowy Brutto na mieszkańca przyczynia się do obliczenia poziomu szczęścia. Jest to stosunek wartości PKB w cenach bieżących do liczby ludności danego obszaru,
+\item \textbf{Rodzina} - stopień, w jakim rodzina przyczynia się do obliczenia poziomu szczęścia. Jest to średnia odpowiedzi w danym kraju, na pytanie GWP ,,Czy będąc w potrzebie, możesz zawsze liczyć na krewnych bądź przyjaciół?'',
+\item \textbf{Zdrowie} - stopień, w jakim oczekiwana długość życia przyczynia się do obliczenia poziomu szczęścia. Estymowana długość życia, obliczana na podstawie danych Światowej Organizacji Zdrowia,
+\item \textbf{Wolność} - stopień, w jakim wolność przyczynia się do obliczenia poziomu szczęścia. Uśredniona odpowiedź na pytanie GWP ,,Czy jesteś usatysfakcjonowany z poziomu wolności wyboru, do tego co chcesz robić w swoim życiu?'',
+\item \textbf{Szczodrość} - stopień, w jakim szczodrość przyczynia się do obliczenia poziomu szczęścia. Równa residuum z regresji średniej krajowej odpowiedzi na pytanie ,,Czy w ostatnim miesiącu przekazałeś pieniądze na cele charytatywne?''. Przeliczony w stosunku do PKB na osobę,
 \item \textbf{Zaufanie do rządu} - stopień, w jakim zaufanie do rządu przyczynia się do obliczenia poziomu szczęścia. Wnioskowany na podstawie odpowiedzi na pytania ,,Czy korupcja jest rozpowszechniona w rządzie?'' oraz ,,Czy korupcja jest rozpowszechniona w przedsiębiorstwach?''. W przypadku braku danych dotyczących korupcji w rządzie, jako ogólną miarę postrzegania korupcji stosuje się percepcję korupcji w biznesie.
+\item \textbf{Dystopia} - każdy kraj jest porównywany z hipotetycznym narodem o nazwie Dystopia. Dystopia reprezentuje najniższe średnie krajowe dla każdej z sześciu kluczowych zmiennych i jest, wraz z błędem resztkowym, używana jako punkt odniesienia regresji.
 \item \textbf{Korupcja} - Postrzegany poziom korupcji w państwie. Im wyższa punktacja, tym niższa korupcja.
 \end{itemize}
 
 ## Cel analizy
-Sprawdzimy jak zmienia się globalny poziom _szczęścia_ na przestrzeni lat. Następnie znajdziemy miejsca, w których uśrednione wartości są najmniejsze lub największe. Poza tym, wyznaczymy i zobrazujemy korelację pomiędzy _szczęsciem_ a pozostałymi _statystykami_.
+Sprawdzimy jak zmienia się globalny poziom _szczęścia_ na przestrzeni lat. Następnie znajdziemy miejsca, w których uśrednione wartości są najmniejsze lub największe. Poza tym, wyznaczymy i zobrazujemy korelację pomiędzy _szczęsciem_ a pozostałymi zmiennymi.
 na koniec zbadamy czy stopień w jakim państwo jest skorumpowane, ma wpływ na jego poziom szczęścia.
 
 [^1]:: \href{http://prac.im.pwr.edu.pl/~giniew/doku.php}{http://prac.im.pwr.edu.pl/~giniew/doku.php}
@@ -159,7 +160,14 @@ na koniec zbadamy czy stopień w jakim państwo jest skorumpowane, ma wpływ na 
 
 # Analiza i wizualizacja danych
 
-Najpierw zobaczmy jak wyglądają dane. Wnioskujemy z opisu danych [^5], że kolumny _Rodzina_ i _Wsparcie społeczne_ mówą o tym samym i uzupełniają się wzajemnie. W związku z tym wartości z _wsparcia_ dopisujemy do _rodziny_ i usuwamy niepotrzebną kolumnę. Braki danych w zestawie są opisane jako zera. Do znalezienia ich użyjemy funkcji _which_ użytej do każdej kolumny naszego zbioru. Zwróci ona pozycję zer. Gdzieniegdzie te braki danych mogą nieść pewną dodatkową informację. Przykładowo, jeśli napotkamy zera w kolumnie *Wolność* może oznaczać brak możliwości umieszczenia konkretnego pytania w ankiecie z powodów politycznych. Zamieniamy te wartości na *NA*, by nie przeszkadzały w liczeniu średnich wartości w dalszej części sprawozdania. Kilka pierwszych rzędów przekształconego w ten sposób zestawu umieszczamy w tabeli \ref{tab:head}. Zauważmy, że estymowane statystyki sumują się do *Szczęścia*. Po użyciu funkcji *unique* dla kolumn Państw i kontynentów dowiadujemy się, że mamy do dyspozycji dane pochodzące ze 132 państw, rozmieszczonych na wszystkich kontynentach zebrane w latach 2015-2020. Zobaczmy jak na przestrzeni czasu wyglądało *Szczęście* dla każdego z kontynentów \ref{fig:trend}. Kolorem czerwonym została oznaczona średnia z całego świata.
+Najpierw zobaczmy jak wyglądają dane. Wnioskujemy z opisu danych [^5], że kolumny _Rodzina_ i _Wsparcie społeczne_ mówą o tym samym i uzupełniają się wzajemnie. W związku z tym wartości z _wsparcia_ dopisujemy do _rodziny_ i usuwamy niepotrzebną kolumnę. Braki danych w zestawie są opisane jako zera. Do znalezienia ich użyjemy funkcji _which_ użytej do każdej kolumny naszego zbioru. Zwróci ona pozycję zer. Gdzieniegdzie te braki danych mogą nieść pewną dodatkową informację. Przykładowo, jeśli napotkamy zera w kolumnie *Wolność* może oznaczać brak możliwości umieszczenia konkretnego pytania w ankiecie z powodów politycznych. Zamieniamy te wartości na *NA*, by nie przeszkadzały w liczeniu średnich wartości w dalszej części sprawozdania.
+
+```{r, echo=FALSE, warning=FALSE}
+knitr::kable(df[1:6,], "latex", caption = "Pierwsze rzędy zestawu danych", label = "head") %>% 
+  kable_styling(latex_options = c("scale_down", "hold_position"))
+```
+
+Kilka pierwszych rzędów przekształconego w ten sposób zestawu umieszczamy w tabeli \ref{tab:head}. Zauważmy, że estymowane statystyki sumują się do *Szczęścia*. Po użyciu funkcji *unique* dla kolumn Państw i kontynentów dowiadujemy się, że mamy do dyspozycji dane pochodzące ze 132 państw, rozmieszczonych na wszystkich kontynentach zebrane w latach 2015-2020. Zobaczmy jak na przestrzeni czasu wyglądało *Szczęście* dla każdego z kontynentów na wykresie \ref{fig:trend}. Kolorem czerwonym została oznaczona średnia z całego świata.
 
 ```{r, fig.cap="\\label{fig:trend}Średnie szczęście na przestrzeni lat", out.width="60%", fig.align = "center"}
 r
@@ -168,26 +176,17 @@ r
 
 
 
-Widzimy, że dane nieznacznie fluktuują zatem uśrednimy je w celu bardziej przejrzystej analizy. Średni _poziom szczęścia_ każdego państwa umieszczamy na wykresie \ref{fig:szczęście}, oznaczając kolorem kontynent w którym się ono znajduje.
-Zauważamy, że w niższej strefie dominują kraje z Afryki i Azji, natomiast w wyższej - Australii i Ameryki Północnej. Nanieśmy więc średni _poziom szczęścia_ na mapę świata (rys. \ref{fig:świat}). Nasze przypuszczenia się potwierdzają. Jest stosunkowo dużo braków danych w Afryce. Biorąc pod uwagę jednak to, że dosyć podobnie rozłożony jest tam średni _poziom szczęścia_, nie traktujemy tego jako problem.
+Widzimy, że dane nieznacznie fluktuują zatem uśrednimy je w celu bardziej przejrzystej analizy. Średni poziom _szczęścia_ każdego państwa umieszczamy na wykresie \ref{fig:szczęście}, oznaczając kolorem kontynent w którym się ono znajduje.
+Zauważamy, że w niższej strefie dominują kraje z Afryki, natomiast w wyższej - Australii i Europy. Nanieśmy więc średni poziom _szczęścia_ na mapę świata (rys. \ref{fig:świat}). Nasze obserwacje potwierdzają się. Jest stosunkowo dużo braków danych w Afryce. Biorąc pod uwagę jednak to, że dosyć podobnie rozłożony jest tam średni poziom _szczęścia_, nie traktujemy tego jako problem.
 
 
-```{r, echo=FALSE, warning=FALSE}
-knitr::kable(df[1:6,], "latex", caption = "Pierwsze rzędy zestawu danych", label = "head") %>% 
-  kable_styling(latex_options = "scale_down")
-```
 
-```{r, echo=FALSE, warning=FALSE}
-knitr::kable(q_mean, "latex", caption = "Średnie wartości statystyk na kontynentach", label = "meany") %>% 
-  kable_styling(latex_options = "scale_down")
-```
-
-```{r, fig.cap="\\label{fig:szczęście}Poziom szczęścia dla danych krajów", out.width="100%", fig.align = "center"}
+```{r, fig.cap="\\label{fig:szczęście}Poziom szczęścia dla danych krajów", out.width="90%", fig.align = "center"}
 s
 ```
 
 
-```{r, fig.cap="\\label{fig:świat}Poziom szczęścia na świecie", out.width="70%", fig.align = "center"}
+```{r, fig.cap="\\label{fig:świat}Poziom szczęścia na świecie", out.width="90%", fig.align = "center"}
 u
 ```
 Przejdźmy teraz do analizy korelacji między poziomem _szczęścia_ a wybranymi czynnikami. Przypomnijmy po krótce na czym będą polegały użyte w raporcie metody.
@@ -202,7 +201,7 @@ Obie wymienione wyżej korelacje przyjmują wartości z przedziału od -1 do 1. 
 t
 ```
 
-Wykres \ref{fig:korelacje} przedstawia wielkość korelacji Pearsona i Spearmana między poziomem _szczęścia_ a czynnikami z naszego zbioru danych. Oba dają podobne wyniki, zatem możemy się spodziewać zależności liniowej. Aby lepiej przyjrzeć się występującym zależnościom, przedstawimy badane dane na wykresach punktowych.
+Wykres \ref{fig:korelacje} przedstawia wielkość korelacji Pearsona i Spearmana między poziomem _szczęścia_ a czynnikami z naszego zbioru danych. Oba dają podobne wyniki, zatem możemy się spodziewać zależności liniowej. Aby lepiej przyjrzeć się występującym zależnościom, przedstawimy badane dane na wykresach punktowych (rys. \ref{fig:scatters}).
 
 ```{r, fig.cap="\\label{fig:scatters}Poziom szczęścia na świecie", out.width="60%", fig.align = "center"}
 w
@@ -212,9 +211,8 @@ Na wykresach \ref{fig:scatters} traktujemy poszczególne czynniki jako zmienne o
 ```{r, message=FALSE, fig.cap="\\label{fig:zaufanie do rządu a korupcja}Zestawienie statystyk dotyczących korupcji",out.width="60%", fig.align = "center"}
 x
 ```
-\newpage
 
-Aby zobaczyć dokładniej jak ma się _korupcja_ do _zaufania do rządu_, przyjrzymy się wykresowi \ref{fig:zaufanie do rządu a korupcja}. Widzimy, że gdy korupcja jest wysoka (tzn. przyjmuje niskie wartości na osi), jej wpływ na szczęście jest nikły, ale nie występuje tu oczywista zależność, natomiast gdy zaczyna ona spadać (dla wartości większych od 50), jej wpływ na szczęście staje się bardziej istotny. W tym przypadku możemy próbować doszukiwać się zależności innej niż liniowa, chociażby oznaczonej.
+Aby zobaczyć dokładniej jak ma się _korupcja_ do _zaufania do rządu_, przyjrzymy się wykresowi \ref{fig:zaufanie do rządu a korupcja}. Widzimy, że gdy korupcja jest wysoka (tzn. przyjmuje niskie wartości na osi), jej wpływ na szczęście jest nikły, ale nie występuje tu oczywista zależność, natomiast gdy zaczyna ona spadać (dla wartości większych od 50), jej wpływ na szczęście staje się bardziej istotny. W tym przypadku możemy próbować doszukiwać się zależności innej niż liniowa.
 
 # Podsumowanie
 
