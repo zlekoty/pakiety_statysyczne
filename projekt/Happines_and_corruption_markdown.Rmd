@@ -95,7 +95,8 @@ for(k in colnames(df2)){
 w <- plot_grid(plotlist = p)
 v <- plot_grid(plotlist = h)
 x <- ggplot(df2, aes(x = Korupcja, y = `Zaufanie do rządu`))+ 
-  geom_point()
+  geom_point()+
+  geom_smooth()
 #cor(df2$`Zaufanie do rządu`,df2$Korupcja)
 ```
 
@@ -155,7 +156,7 @@ v
 
 ## Cel analizy
 
-Naszym pierwszorzędnym priorytetem będzie znalezienie korelacji między _poziomem korupcji_ a _poziomem szczęścia_. Oczekujemy, że w państwach, gdzie żyje się gorzej, panuje wysoka korupcja. W tym celu zbadamy globalny _poziom szczęścia_ i znajdziemy kraje, w których przyjmuje on skrajne wartości. Następnie przyjrzymy się jak poszczególne statystyki wpływają na _szczęście_ dla tych państw. Dodatkowo sprawdzimy, jak zmieniał się estymowany wpływ korupcji na _szczęście_ w czasie.
+Naszym pierwszorzędnym priorytetem będzie znalezienie korelacji między poziomem _korupcji_ a poziomem _szczęścia_. Oczekujemy, że w państwach, gdzie żyje się gorzej, panuje wysoka korupcja. W tym celu zbadamy globalny poziom _szczęścia_ i znajdziemy kraje, w których przyjmuje on skrajne wartości. Następnie przyjrzymy się jak poszczególne statystyki wpływają na _szczęście_ dla tych państw. Dodatkowo sprawdzimy, jak zmieniał się estymowany wpływ korupcji na _szczęście_ w czasie.
 Na podstawie tych informacji wyciągniemy wnioski.
 
 [^1]:: \href{http://prac.im.pwr.edu.pl/~giniew/doku.php}{http://prac.im.pwr.edu.pl/~giniew/doku.php}
@@ -200,10 +201,8 @@ s
 u
 ```
 
-Studium przypadku Ukraina, afganistan, wenezuela.
 
-
-Przejdźmy teraz do analizy korelacji między poziomem szczęścia a wybranymi czynnikami. Przypomnijmy po krótce na czym będą polegały użyte w raporcie metody.
+Przejdźmy teraz do analizy korelacji między poziomem _szczęścia_ a wybranymi czynnikami. Przypomnijmy po krótce na czym będą polegały użyte w raporcie metody.
 \begin{itemize}
 \item {Korelacja Pearsona} mierzy stopień zależności liniowej pomiędzy dwoma zmiennymi.
 \item {Korelacja Spearmana} mierzy stopień korelacji pomiędzy dwoma zmiennymi na podstawie ich pozycji w rankingu. Może być obliczana dla danych, które nie są dobrze opisane przez prostą, ale istnieje między nimi jakiś rodzaj zależności.
@@ -215,16 +214,16 @@ Obie wymienione wyżej korelacje przyjmują wartości z przedziału od -1 do 1. 
 t
 ```
 
-Wykres \ref{fig:korelacje} przedstawia wielkość korelacji między poziomem szczęścia czynnikami z naszego zbioru danych. 
+Wykres \ref{fig:korelacje} przedstawia wielkość korelacji Pearsona i Spearmana między poziomem _szczęścia_ a czynnikami z naszego zbioru danych. Oba dają podobne wyniki, zatem możemy się spodziewać zależności liniowej. Aby lepiej przyjrzeć się występującym zależnościom, przedstawimy badane dane na wykresach punktowych.
 
-```{r, fig.cap="\\label{fig:}Poziom szczęścia na świecie", out.width="60%", fig.align = "center"}
+```{r, fig.cap="\\label{fig:scatters}Poziom szczęścia na świecie", out.width="60%", fig.align = "center"}
 w
 ```
+Na wykresach \ref{fig:scatters} traktujemy poszczególne czynniki jako zmienne opisujące, natomiast _szczęście_ jako zmienną opisywaną. Dodatkowo prosta jest wynikiem zastosowania regresji liniowej. Patrząc na otrzymane wykresy oraz korelacje widzimy, że największą zależność ze _szczęściem_ mają _rodzina_, _zdrowie_ i _PKB na osobę_, czyli powszechnie uznawane wartości. Jeżeli te czynniki będą utrzymane na wysokim poziomie, spodziewamy się że szczęście również takie będzie. Najgorzej w zestawieniu wypada _szczodrość_ - nie możemy wnioskować czy jeżeli ta będzie rosnąć, rosnąć bedzie również nasza zmienna opisywana, regresja liniowa w tym przypadku nie jest uzasadniona. Uwagę może zwrócić również fakt, że korelacja _szczęścia_ z _korupcją_ jest istotnie wyższa niż korelacja _szczęścia_ z _zaufaniem do rządu_, gdzie oba czynniki mierzą poziom korupcji, przy czym to drugie bada jej wpływ na _szczęście_. Pokazuje nam to, że nie zawsze korelacja oznacza przyczynowość.
 
-
-```{r, fig.cap="\\label{fig:zaufanie do rządu a korupcja}Zestawienie statystyk dotyczących korupcji", out.width="60%", fig.align = "center"}
+```{r, fig.cap="\\label{fig:zaufanie do rządu a korupcja}Zestawienie statystyk dotyczących korupcji", out.width="60%", fig.align = "center",warning=FALSE}
 x
 ```
-
+Aby zobaczyć dokładniej jak ma się _korupcja_ do _zaufania do rządu_, przyjrzymy się wykresowi \ref{fig:zaufanie do rządu a korupcja}. Widzimy, że gdy korupcja jest wysoka (tzn. przyjmuje niskie wartości na osi), jej wpływ na szczęście jest nikły, ale nie występuje tu oczywista zależność, natomiast gdy zaczyna ona spadać (dla wartości większych od 50), jej wpływ na szczęście staje się bardziej istotny. W tym przypadku możemy próbować doszukiwać się zależności innej niż liniowa, chociażby oznaczonej.
 
 # Podsumowanie
