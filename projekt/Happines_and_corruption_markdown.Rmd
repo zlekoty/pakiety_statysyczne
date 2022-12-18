@@ -9,7 +9,7 @@ date: "2022-12-18"
 \renewcommand{\tablename}{Tabela}
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.pos = "H")
 library(kableExtra)
 ```
 
@@ -129,7 +129,7 @@ x <- ggplot(df2, aes(x = Korupcja, y = `Zaufanie do rządu`))+
 # Wstęp
 
 Niniejsze sprawozdanie zostało sporządzone w ramach laboratorium Pakietów Statystycznych, prowadzonych przez dr inż. Daniela Kucharczyka[^1], do wykładu dr Andrzeja Giniewicza[^2]. Naszym zadaniem jest analiza wybranych danych rzeczywistych, która posłuży do rozwiązania ustalonego problemu badawczego.
-Do wykonania naszego raportu wykorzystamy pakiet R wraz z jego wybranymi bibliotekami, których krótki opis zawarliśmy w Tabeli \ref{tab:pakiety}. Chcemy, aby nasz raport był w pełni odtwarzalny przez Czytelnika. Dlatego będziemy opisywać kolejne czynności krok po kroku.
+Do wykonania naszego raportu wykorzystamy pakiet R wraz z jego wybranymi bibliotekami, których krótki opis zawarliśmy w Tabeli \ref{tab:pakiety}.
 
 \begin{center}
 ```{r}
@@ -188,21 +188,25 @@ Na podstawie tych informacji wyciągniemy wnioski.
 
 # Analiza i wizualizacja danych
 
+Najpierw zobaczmy jak wyglądają dane. Wnioskujemy z opisu danych (zrobić odniesienie), że kolumny _Rodzina_ i _Wsparcie społeczne_ mówą o tym samym i uzupełniają się wzajemnie. W związku z tym wartości z _wsparcia_ dopisujemy do _rodziny_ i usuwamy niepotrzebną kolumnę. Braki danych w zestawie są opisane jako zera. Do znalezienia ich użyjemy funkcji _which_ użytej do każdej kolumny naszego zbioru. Zwróci ona pozycję zer. Gdzieniegdzie te braki danych mogą nieść pewną dodatkową informację. Przykładowo, jeśli napotkamy zera w kolumnie *Wolność* może oznaczać brak możliwości umieszczenia konkretnego pytania w ankiecie z powodów politycznych. Zamieniamy te wartości na *NA*, by nie przeszkadzały w liczeniu średnich wartości w dalszej części sprawozdania. Kilka pierwszych rzędów przekształconego w ten sposób zestawu umieszczamy w tabeli \ref{tab:head}. Zauważmy, że estymowane statystyki sumują się do *Szczęścia*. Po użyciu funkcji *unique* dla kolumn Państw i kontynentów dowiadujemy się, że mamy do dyspozycji dane pochodzące ze 132 państw, rozmieszczonych na wszystkich kontynentach. Uśredniamy dane dla każdego z nich i średni _poziom szczęścia_ umieszczamy na wykresie \ref{fig:szczęście}, Kolorem rozróżniamy kontynenty do których należą państwa.
+Zauważamy, że w niższej strefie dominują kraje z Afryki i Azji, natomiast w wyższej - Australii i Ameryki Północnej. Nanieśmy więc średni _poziom szczęścia_ na mapę świata (rys. \ref{fig:świat}). Nasze przypuszczenia się potwierdzają. Jest stosunkowo braków danych w Afryce. Biorą pod uwagę jednak to, że dosyć podobnie rozłożony jest tam średni _poziom szczęścia_, nie traktujemy to jako problem. Na uwagę zasługuje Afganistan, który stanowi pewnego rodzaju ciemną wyspę na tle Azji. Podobnie Ukraina na tle Europy.
+
+
 ```{r, echo=FALSE, warning=FALSE}
-knitr::kable(df[1:5,], "latex", caption = "Pierwsze rzędy zestawu danych", label = "head") %>% 
+knitr::kable(df[1:6,], "latex", caption = "Pierwsze rzędy zestawu danych", label = "head") %>% 
   kable_styling(latex_options = "scale_down")
 ```
 
-```{r, fig.cap="\\label{fig:trend}Średnie szczęście na przestrzeni lat", out.width="60%", fig.align = "center"}
-r
-```
-
-```{r, fig.cap="\\label{fig:szczęście}Poziom szczęścia dla danych krajów", out.width="60%", fig.align = "center"}
+```{r, fig.cap="\\label{fig:szczęście}Poziom szczęścia dla danych krajów", out.width="100%", fig.align = "center"}
 s
 ```
 
 ```{r, fig.cap="\\label{fig:świat}Poziom szczęścia na świecie", out.width="60%", fig.align = "center"}
 u
+```
+
+```{r, fig.cap="\\label{fig:trend}Średnie szczęście na przestrzeni lat", out.width="60%", fig.align = "center"}
+r
 ```
 
 ```{r, fig.cap="\\label{fig:korelacje}Korelacja poziomem szczęścia a wybranymi statystykami", , out.width="60%", fig.align = "center"}
