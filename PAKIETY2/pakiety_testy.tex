@@ -1,0 +1,93 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[export]{adjustbox}
+\usepackage{mathtools,amsthm,amssymb,icomma,upgreek,xfrac,enumerate, bbm,titlesec,lmodern,polski,derivative,geometry,multicol,titling,graphicx,url,amsmath,caption,lipsum,float,longtable,booktabs}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage[hidelinks,breaklinks,pdfusetitle,pdfdisplaydoctitle]{hyperref}
+\setlength{\droptitle}{-1cm}
+\mathtoolsset{showonlyrefs,mathic}
+\title{Pakiety statystyczne raport 2}
+\author{Adam Wrzesiński, Joanna Kołaczek}
+\date{18.07.2022}
+\newtheoremstyle{break}
+{\topsep}{\topsep}%
+{\normalfont}{}%
+{\bfseries}{}%
+{\newline}{}%
+\theoremstyle{break}
+\newtheorem{zadanie}{Zadanie} 
+\newtheorem*{rozwiazanie}{Rozwiązanie}
+
+\titleformat*{\section}{\LARGE\bfseries}
+\titleformat*{\subsection}{\Large\bfseries}
+\titleformat*{\subsubsection}{\large\bfseries}
+\titleformat*{\paragraph}{\large\bfseries}
+\titleformat*{\subparagraph}{\large\bfseries}
+
+%% KOMENDY:
+\newcommand*{\e}{\mathrm{e}}
+\newcommand{\hyline}[2]{%
+	$#1$\> --\kern.5em #2 \\}
+
+
+%% OPERATORY:
+% `\diff` od „differential”, czyli odpowiednika słowa „różniczka” w języku
+% angielskim.
+\DeclareMathOperator{\diff}{d\!}
+\newcommand{\indep}{\perp \!\!\! \perp}
+\DeclareMathOperator{\EX}{\mathbb{E}}
+\newcommand*{\E}{\mathrm{e}}
+
+
+
+\begin{document}
+	\maketitle
+	\tableofcontents
+	\clearpage
+	\section*{Wstęp}
+	
+	Niniejszy raport powstał na potrzeby realizacji laboratorium z Pakietów Statystycznych, prowadzonych przez dr inż. XXXX, do wykładu dr inż. Andrzeja Giniewicza. 
+	
+	Będziemy testować hipotezy statystyczne dla wartości średniej i wariancji w rodzinie rozkładów normalnych. Zobrazujemy także obszary krytyczne, wyznaczymy p-wartości oraz prawdopodobieństwo wystąpienia błędów I i II rodzaju. Życzymy miłej lektury.
+	
+	\section*{Transformata sinh-arcsinh}
+	Przy generowaniu rozkładu normalnego, musimy ustalić parametr położenia $\mathbf{\mu}$ (dla rozkładu normalnego jest to średnia) oraz parametr skali $\mathbf{\sigma}$ (w tym przypadku będzie to odchylenie standardowe). Transformata sinh-arcsinh rozkładu normalnego wprowadza nowe parametry, które kontrolują asymetrię $\mathbf{\nu}$ i ciężkość ogonów $\mathbf{\tau}$. Dane cztery parametry definiują rozkład normalny sinh-arcsinh jako:
+	$$X = \mu + \sigma \cdot \sinh \left[ \frac{\sinh^{-1}(Z)+\nu}{\tau}\right],$$
+	gdzie $Z$ jest zmienną losową z standardowego rozkładu normalnego oraz:
+	$$\sinh(x) = \frac{\e^x + \e^{-x}}{2}, \quad \sinh^{-1}(x) = \log(x+\sqrt{1+x^2}).$$
+	Na rysunkach 1, 2, 3 widzimy przykładowe rozkłady normalne po transformacji.
+	\\ \\
+	Jak widać wartości $\nu > 0$ oznaczają rozkłady prawoskośne, $\nu < 0$ lewoskośne, $\tau > 1$ oznacza rozkłady o chudszych ogonach niż normalny, natomiast $\tau < 1$ grubszych. Warto jednak podkreślić, że $\nu$ i $\tau$ nie są skośnością oraz kurtozą, jedynie parametrami kontrolującymi je nie wprost.
+	W dalszej części raportu, sprawdzimy jak zmiany skośności oraz kurtozy wpływają na moc omawianych testów.
+	
+	\section*{Wybrane testy statystyczne}
+	Testy statystyczne mają zadanie oszacować prawdopodobieństwo spełnienia pewnej hipotezy statystycznej w populacji na podstawie próby losowej z tej populacji. W raporcie przyjrzymy się jak zmienia się moc wybranych testów normalności w obliczu transformaty sinh-arcsinh. Hipoteza zerowa $H_0$ którą przyjmujemy w każdym z nich brzmi: \textit{Próba pochodzi z rozkładu normalnego} przeciwko  hipotezie alternatywnej $H_1$: \textit{Próba nie pochodzi z rozkładu normalnego}.
+	\subsection*{Test Shapiro-Wilka}
+	Opiera się on na statystyce $W$, wyliczanej na podstawie danych z próbki, która będzie tym bliższa~1 im bardziej prawdopodobne jest to, że dane pochodzą z rozkładu normalnego.
+	$$W = \frac{(\sum_{i=1}^{n}a_i x_{(i)})^2}{\sum_{i=1}^{n} (x_i - \bar{x})^2},$$
+	gdzie $x_{{(i)}}$ z nawiasami w indeksie dolnym to i-ta najmniejsza liczba w próbie (nie mylić z $x_{i}$) a $\bar{x}$ oznacza średnią próbkową. Współczynniki $a_i$ dane są jako:
+	$$(a_1, \dots, a_n) = \frac{m^T V^{-1}}{C},$$
+	 gdzie $C$ jest wektorem norm:
+	 $$C = \|V^{-1} m\| = (m^T V^{-1} V^{-1} m)^{\frac{1}{2}},$$
+	 a wektor $m$:
+	 $$m = (m_1,\dots,m_n)^T$$
+	składa się z wartości oczekiwanych statystyki porządkowej (ang. \textit{order statistics}) niezależnych zmiennych losowych próbkowanych ze standardowego rozkładu normalnego, natomiast $V$ jest macierzą kowariancji tejże statystyki.
+	
+	\subsection*{Test Kołmogorowa-Lillieforsa}
+	Statystyka tego testu, to maksymalna bezwzględna różnica między empiryczną a hipotetyczną funkcją rozkładu skumulowanego. Można obliczyć ją jako $D = D^+, D^-$, gdzie
+	$$D^{+} = \max_{i=1,..., n}(i/n - p_{(i)}),\quad D^{-} = \max_{i=1,..., n}(p_{(i)} - (i-1)/n),$$
+	gdzie: $$p_{(i)} = \Phi([x_{(i)} - \overline{x}]/s).$$ Tutaj $\Phi$ jest funkcją skumulowanego standardowego rozkładu normalnego, $\bar{x}$ i $s$ są średnią i odchyleniem standardowym wartości danych. 
+
+	\subsection*{Test Jarque-Bera}
+	 Jest to test dopasowania (ang. \textit{goodness of fit}), określający czy dane z próbki mają skośność i kurtozę odpowiadającą rozkładowi normalnemu. Statystyka $JB$ testu jest zawsze większa bądź równa zero. Jeżeli jest daleka od zera, sygnalizuje, że dane nie mają rozkładu normalnego.
+	 $$JB = \frac{n}{6} \left( S^2 + \frac{1}{4} (K-3)^2 \right),$$
+	 gdzie $n$ oznacza ilość obserwacji, natomiast $S$ oznacza skośność a $K$ kurtozę:
+	 
+	 $$S={\frac  {{\hat  {\mu }}_{3}}{{\hat  {\sigma }}^{3}}}={\frac  {{\frac  1n}\sum _{{i=1}}^{n}(x_{i}-{\bar  {x}})^{3}}{\left({\frac  1n}\sum _{{i=1}}^{n}(x_{i}-{\bar  {x}})^{2}\right)^{{3/2}}}},\qquad K={\frac {{\hat {\mu }}_{4}}{{\hat {\sigma }}^{4}}}={\frac {{\frac {1}{n}}\sum _{i=1}^{n}(x_{i}-{\bar {x}})^{4}}{\left({\frac {1}{n}}\sum _{i=1}^{n}(x_{i}-{\bar {x}})^{2}\right)^{2}}},$$
+	 
+	 Jeśli dane pochodzą z rozkładu normalnego, statystyka JB zbiega asymptotycznie do rozkładu chi kwadrat z dwoma stopniami swobody.
+	\section*{Zadanie 1}
+	Wiemy, że $H_0$: \textit{Próba pochodzi z rozkładu normalnego} jest fałszywa dla .....
+
+\end{document}
