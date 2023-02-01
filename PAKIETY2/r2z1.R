@@ -4,6 +4,7 @@ library(nortest)
 library(dplyr)
 library(ggplot2)
 
+setwd("C:/Users/zleko/Desktop/PAKIETY2/")
 #zadanie 1
 
 taus <- seq(0.5,2,0.1)
@@ -52,12 +53,15 @@ for (nu in nu_list) {
   temp_df$nu <- nu
   df <- rbind(df, temp_df)
 }
-df %>% filter(nu >= 0) %>%
-  ggplot(aes(x = x, y = y, col = factor(nu))) +
-  geom_line() + theme_bw()
+bb <-df %>% filter(nu >= 0) %>%
+ggplot(aes(x = x, y = y, col = factor(nu))) +
+  geom_line(aes(linetype=factor(nu))) +theme_bw(base_size = 20) +
+  labs(col = expression(nu), linetype = expression(nu), y= "Gêstoœæ", x = "X") +
+  theme(legend.position="top")
+ggsave("skos.pdf")
 df %>% filter(nu <= 0) %>%
   ggplot(aes(x = x, y = y, col = factor(nu))) +
-  geom_line() + theme_bw()
+  geom_line(aes(linetype=factor(nu))) +theme_bw()
 
 # transformacja ogonów
 tau_list <- c(0.25, 0.75, 1, 1.5)
@@ -68,21 +72,23 @@ for (tau in tau_list) {
   temp_df$tau <- tau
   df <- rbind(df, temp_df)
 }
-ggplot(data = df, aes(x = x, y = y, col = factor(tau))) +
-  geom_line() + theme_bw()
+aa<-ggplot(data = df, aes(x = x, y = y, col = factor(tau))) +
+  geom_line(aes(linetype=factor(tau))) +theme_bw(base_size = 20) +labs(col = expression(tau), linetype = expression(tau),
+                                y= "Gêstoœæ", x = "X") +
+  theme(legend.position="top")
+
+aa
+
+pdf("kurt.pdf")
+print(aa)
+dev.off()
 
 
 
 
-
-
-
-
-
-
-
-
-
+pdf("skos.pdf")
+print(bb)
+dev.off()
 
 
 
